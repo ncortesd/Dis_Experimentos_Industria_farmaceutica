@@ -1,0 +1,1800 @@
+---
+title: "Impacto de la eliminación de réplicas y puntos centrales en diseños factoriales fraccionales $2^{k-p}$"
+lang: es
+editor: visual
+embed-resources: true
+bibliography: references.bib
+number-sections: true
+
+format:
+  html:
+    toc: true
+    toc-title: "Índice"
+    toc-location: body
+    toc-depth: 3
+    toc-expand: true
+---
+
+# *Metodología*
+
+## Evaluación de la significancia de los efectos
+
+```{r}
+#| echo: FALSE
+#| warnings: FALSE
+# Número de iteraciones - significancia de efectos
+n <- 10
+```
+
+El presente estudio tiene como propósito analizar el impacto de eliminar réplicas o los puntos centrales en un diseño factorial completo $2^k$ sobre la significancia estadística de los efectos principales e interacciones, así como sobre el error cuadrático medio (ECM). Para este fin se realizaron `r n` simulaciones independientes, y en cada simulación se generó un caso particular de efectos activos y su correspondiente respuesta.
+
+En cada simulación se genera un vector con todos los factores y sus interacciones del respectivo diseño factorial completo $2^k$ los cuales se agrupan en el vector `todos_efectos`, así:
+
+| Diseño factorial | Número de efectos | Efectos |
+|-----------------------|-------------------------------|------------------|
+| $2^2$ | 3 | A, B, AB |
+| $2^3$ | 7 | A, B, C, AB, AC, BC, ABC |
+| $2^4$ | 15 | A, B, C, D, AB, AC, AD, BC, BD, CD, ABC, ABD, ACD, BCD, ABCD |
+| $2^5$ | 31 | A, B, C, D, E, AB, AC, AD, AE, BC, BD, BE, CD, CE, DE, ABC, ABD, ABE, ACD, ACE, ADE, BCD, BCE, BDE, CDE, ABCD, ABCE, ABDE, ACDE, BCDE, ABCDE |
+
+A partir de este conjunto, se selecciona aleatoriamente un número aleatorio de efectos que serán considerados significativos; dichos efectos se denominan `efectos activos`. A estos efectos se les asigna un valor aleatorio tomado de una distribución uniforme en el intervalo $[−7,-0.5]$ y $[0.5, 7]$, mientras que los demás mantienen valor cero. De esta forma se construye el vector `efectos_reales_vec`, que refleja cuáles efectos son diferentes de cero. Posteriormente, la información se almacena en la tabla `efectos_reales`, que guarda en forma binaria (1/0) cuáles factores fueron definidos como significativos.
+
+Se genera un diseño factorial $2^k$ con dos réplicas y cinco puntos centrales (`dis1_cod`). A este diseño se le asigna una respuesta (`yrta`) calculada en función de los efectos previamente definidos, es decir, se multiplican los valores de los factores y sus interacciones por los coeficientes correspondientes en `efectos_reales_vec`, más un término de error aleatorio `error` con distribución normal $(\mu = 0, \sigma^2 = 2^2)$. Como resultado, los factores seleccionados como activos aportan un efecto distinto de cero, mientras que los demás se anulan. La respuesta final se obtiene sumando estos efectos y el error a una constante de 50.
+
+Este diseño inicial se emplea para construir otras tres variantes eliminando, de manera aleatoria, filas correspondientes a réplicas o puntos centrales: un diseño con réplicas pero sin puntos centrales (`dis2_cod`), un diseño sin réplicas y con cinco puntos centrales (`dis3_cod`) y un diseño sin réplicas con dos puntos centrales (`dis4_cod`)
+
+Para cada diseño se ajusta el modelo completo (`mod1 <- lm(yrta~A*B, data=dis1_cod)`), considerando tanto los efectos principales como las interacciones, y se calcula el ANOVA correspondiente:
+
+*Diseño factorial completo* $2^2$:
+
+$$
+Y \;=\; \beta_0 \;+\; \beta_1 X_1 \;+\; \beta_2 X_2 \;+\; \beta_{12}X_1X_2 \;+\; \varepsilon,
+\quad \varepsilon \sim \mathcal{N}(\mu = 0, \sigma^2 = 2^2)
+$$
+
+*Diseño factorial completo* $2^3$:
+
+$$
+Y = \beta_0 
++ \sum_{i=1}^{3} \beta_i X_i 
++ \sum_{i<j}^{3} \beta_{ij} X_i X_j 
++ \beta_{123} X_1 X_2 X_3 
++ \varepsilon, 
+\quad i = 1,2,3;\;\; j = 1,2,3; 
+\quad \varepsilon  \sim  N(\mu = 0, \sigma^2 = 2^2)
+$$
+
+*Diseño factorial completo* $2^4$:
+
+$$
+Y = \beta_0 
++ \sum_{i=1}^{4} \beta_i X_i 
++ \sum_{i<j}^{4} \beta_{ij} X_i X_j 
++ \sum_{i<j<k}^{4} \beta_{ijk} X_i X_j X_k
++ \beta_{1234}\, X_1 X_2 X_3 X_4
++ \varepsilon
+$$
+
+donde,
+
+$$
+i,j,k \in \{1,2,3,4\},\;\; \varepsilon \sim \mathcal{N}(\mu = 0, \sigma^2 = 2^2)
+$$
+
+*Diseño factorial completo* $2^5$:
+
+$$
+Y = \beta_0 
++ \sum_{i=1}^{5} \beta_i X_i 
++ \sum_{i<j}^{5} \beta_{ij} X_i X_j 
++ \sum_{i<j<k}^{5} \beta_{ijk} X_i X_j X_k
++ \sum_{i<j<k<l}^{5} \beta_{ijkl} X_i X_j X_k X_l
++ \beta_{12345}\, X_1 X_2 X_3 X_4 X_5
++ \varepsilon
+$$
+
+donde,
+
+$$
+i,j,k,l \in \{1,2,3,4,5\},\;\; \varepsilon \sim \mathcal{N}(\mu = 0, \sigma^2 = 2^2)
+$$
+
+Con los resultados de significancia de los efectos se almacenan en las tablas `TAB1_22`, `TAB2_22`y `TAB3_22`, donde el valor 1 indica significancia estadística ($p < 0.05$) y 0 indica no significancia. Este procedimiento se implementa evaluando, en cada fila del ANOVA, si el valor $p$ es menor o igual a 0.05, transformando el resultado lógico en un valor entero.
+
+A partir de estas tablas se calcula el *porcentaje de concordancia* entre los efectos reales y los detectados por cada modelo, la *potencia* (proporción de efectos verdaderamente significativos correctamente identificados) y el *error tipo I* (proporción de efectos nulos detectados como significativos). Los resultados se resumen en la @tbl-1, mientras que la concordancia por factor se presenta en la @fig-plot1.
+
+## Evaluación del ECM con medidas repetidas
+
+Con relación a la evaluación del ECM, se utiliza la metodología de medidas repetidas, en la cual a una misma unidad experimental se le aplican sucesivamente varios tratamientos, generando valores repetidos de la respuesta sobre el mismo individuo (@diaz2010).
+
+En este estudio, a partir de los diseños simulados en la sección anterior, cada fila corresponde a la simulación del diseño experimental de referencia (`dis1_cod`), al que se le generan variantes al eliminar réplicas o puntos centrales (`dis2_cod`, `dis3_cod`, `dis4_cod`). Para cada diseño se obtiene como variable respuesta el Error Cuadrático Medio (ECM), calculado mediante la siguiente fórmula:
+
+$$
+\text{ECM} = \frac{\text{deviance}(modelo)}{\text{grados de libertad del residual}(modelo)}.
+$$
+
+Estos resultados fueron compilados en la matriz `ECM_tab_22`, que corresponde a la matriz $X = (x_{ij})$, donde $x_{ij}$ representa la respuesta del $i$-ésimo sujeto al $j$-ésimo tratamiento. Incialmente, se realiza un análisis descriptivo de los ECM (Ver @fig-plot2). Luego, se construye la matriz de contrastes $C$, donde cada fila representa una hipótesis a evaluar. En este caso, se plantea la utilización de una matriz de contrastes $C_1$ cuyo objetivo es contrastar simultáneamente todas las medias de los tratamientos. Con ello, se busca determinar si existe al menos un tratamiento que difiera significativamente de los demás, lo que constituye el análogo a la prueba ANOVA clásica, pero en un contexto donde los tratamientos son dependientes.
+
+```{r}
+#| echo: FALSE
+#| warnings: FALSE
+# Matriz de contrastes - comparación general
+
+c1 <- c(-1, 1,  0,  0)  
+c2 <- c(0, -1,  1, 0) 
+c3 <- c(0,  0,-1,  1)    
+
+C1 <- matrix(rbind(c1, c2, c3), nrow = 3)
+```
+
+$$
+C_1 =
+\begin{bmatrix}
+-1 & -1 &  0 &  0 \\
+ 0 & -1 &  1 &  0 \\
+ 0 &  0 & -1 &  1
+\end{bmatrix}
+$$
+
+Asimismo, es posible considerar una matriz de contrastes generales de interés $C_2$, tales como:
+
+```{r}
+#| echo: FALSE
+#| warnings: FALSE
+
+# Matriz de contrastes
+
+## Con réplica vs. sin réplica
+c1 <- c(-1, -1,  1,  1)  
+## Evaluación de todo vs. el primero
+c2 <- c(-1,  1,  1,  1) 
+## Evaluación de la réplica con la misma cantidad de los puntos centrales
+c3 <- c( 1, -1,  0,  0)    
+
+C2 <- matrix(rbind(c1, c2, c3), nrow = 3)
+```
+
+$$
+C_2 =
+\begin{bmatrix}
+-1 & -1 &  1 &  1 \\
+-1 &  1 &  1 &  1 \\
+ 1 & -1 &  0 &  0
+\end{bmatrix}
+$$
+
+Donde los contrastes a evaluar son:
+
+*Contraste 1:* Contraste que relaciona los diseños con réplica con respecto a los diseños sin réplica $C_1 =$ (`r c1`)
+
+*Contraste 2:* Contraste que relaciona el diseño con réplica y 5 puntos centrales frente al conjunto de variantes derivadas del mismo $C_2 =$ (`r c2`)
+
+*Contraste 3:* Contraste que relaciona el impacto de la réplica en diseños con la misma cantidad de puntos centrales $C_3 =$ (`r c3`)
+
+La matriz $C$ se utiliza para transformar los datos: $Y = CX$. De esta forma, el problema se reduce a $(p-1)$ dimensiones y se trabaja con contrastes independientes, evitando dependencia entre medias y permitiendo aplicar la prueba $T^2$ de Hotelling.
+
+El cálculo implementado en el código sigue la formulación teórica:
+
+$$
+T^2 = n(C \overline{X})' (CSC')^{-1} (C \overline{X}),
+$$
+
+donde $n$ es el número de simulaciones y $S$ la matriz de covarianzas estimada mediante
+
+$$
+S = \frac{1}{n-1}X'(I - \tfrac{1}{n}\mathbf{1}\mathbf{1}')X.
+$$
+
+La decisión es rechazar $H_0$ si, para un nivel de significancia $\alpha = 0.05$,
+
+$$
+F = \frac{n - p + 1}{(n-1)(p-1)} T^2 > F_{(\alpha, p-1, n-p+1)}
+$$
+
+# *Código*
+
+```{r}
+#| echo: FALSE
+#| warnings: FALSE
+
+# Librerias requeridas
+paquetes <- c("dplyr", "flextable", "tidyr", "ggplot2", "DoE.base")
+
+# Cargar cada paquete en un bucle
+for (pkg in paquetes) {
+  suppressMessages(suppressWarnings(library(pkg, character.only = TRUE)))
+}
+
+cat("Librerías requeridas:", paste(paquetes, collapse = ", "))
+
+```
+
+## Diseño factorial completo $2^2$
+
+### Significancia de los efectos
+
+```{r}
+# Matrices
+TAB1_22 <- matrix(0, nrow = n, ncol = 3)
+TAB2_22 <- matrix(0, nrow = n, ncol = 3)
+TAB3_22 <- matrix(0, nrow = n, ncol = 3)
+TAB4_22 <- matrix(0, nrow = n, ncol = 3)
+TAB6_22 <- matrix(0, nrow = n, ncol = 3)
+efectos_reales_22 <- matrix(NA, nrow = n, ncol = 3)
+
+names_22 <- c("A","B", "A:B")
+colnames(TAB1_22) <- names_22
+colnames(TAB2_22) <- names_22
+colnames(TAB3_22) <- names_22
+colnames(TAB4_22) <- names_22
+colnames(TAB6_22) <- names_22
+colnames(efectos_reales_22) <- names_22
+
+# Tabla para completar los errores
+ECM_tab_22 <- data.frame(       
+    dis1_22 = numeric(n),
+    dis2_22 = numeric(n),
+    dis3_22 = numeric(n),
+    dis4_22 = numeric(n))
+
+# Bucle principal
+set.seed(3)
+for(i in seq_len(n)){
+  ## Efectos a evaluar en el este diseño
+  todos_efectos_22 <- c("A", "B", "A:B")
+  
+  # Selección de un número aleatorio entre 1 y 3
+  # dado que existen 3 efectos posibles a evaluar en este diseño.
+  n_ef <- sample(0:length(todos_efectos_22), 1)
+  
+  # Elección aleatoria _n_ef_ efectos que serán los efectos significativos
+  efectos_activos <- sample(todos_efectos_22, n_ef)
+  efectos_reales_22_vec <- setNames(rep(0, length(todos_efectos_22)), todos_efectos_22)
+  
+  # Asignación de un valor aleatorio a los efectos elegidos como significativos:
+  efectos_reales_22_vec[efectos_activos] <- sample(c(runif(n_ef, -7, -0.5), 
+                                                  runif(n_ef,  0.5, 7)),n_ef)
+  
+  # Guardar efectos reales como 1/0
+  efectos_reales_22[i,] <- c(
+    as.integer(efectos_reales_22_vec["A"]   != 0),
+    as.integer(efectos_reales_22_vec["B"]   != 0),
+    as.integer(efectos_reales_22_vec["A:B"]  != 0))
+  
+  # Generar respuesta
+  
+  ## Diseño con réplicas y con 5 puntos centrales
+ 
+  dis1_cod <- data.frame(
+    A = c(rep(c(-1,1),2), rep(c(-1,1),2), rep(0,5)),
+    B = c(rep(c(rep(-1,2), rep(1,2)), 2), rep(0,5)))
+ 
+  n_corridas <- nrow(dis1_cod)
+  
+  ## Generación del error
+  error <- rnorm(n_corridas, 0, 2)               #error ~ (mu = 0, sigma^2 = 2^2)
+  
+  ## Generación de la respuesta
+  yrta <- 50 +
+    efectos_reales_22_vec["A"]   * dis1_cod$A +
+    efectos_reales_22_vec["B"]   * dis1_cod$B +
+    efectos_reales_22_vec["A:B"]  * dis1_cod$A * dis1_cod$B +
+    error
+  
+  ## Asignación de la respuesta al dis1_cod
+  dis1_cod <- cbind(dis1_cod, yrta)
+ 
+  ## Diseño con réplicas y sin puntos centrales
+  
+  dis2_cod <- dis1_cod[-c(9:13),]
+  
+  ## Diseño sin réplica y con cinco puntos centrales
+  rep1 <- c(1:4)
+  rep2 <- c(5:8)
+  seleccion_name <- sample(c("rep1","rep2"),1)   #repetición a eliminar
+  sel <- get(seleccion_name)
+  
+  dis3_cod <- dis1_cod[-sel,]      
+  
+  ## Diseño sin réplica y con dos puntos centrales
+  rep1 <- c(1:4)
+  rep2 <- c(5:8)
+  seleccion_name <- sample(c("rep1","rep2"),1)   #repetición a eliminar
+  sel <- get(seleccion_name)
+  rep_pc <- sample(c(9:13),3)                    #punto central a eliminar
+  
+  dis4_cod <- dis1_cod[-c(sel,rep_pc),]     
+  
+  ## Diseño sin réplica y sin puntos centrales
+  rep1 <- c(1:4, 9:13)
+  rep2 <- c(5:8, 9:13)
+  seleccion_name <- sample(c("rep1","rep2"),1)   #repetición a eliminar
+  sel <- get(seleccion_name)
+  
+  dis6_cod <- dis1_cod[-sel,] 
+  
+  mod6 <- lm(yrta~A*B, data=dis6_cod)
+  
+  graf <- suppressMessages(halfnormal(mod6, alpha = 0.05, plot=FALSE, method="Lenth"))
+  signif <- graf$signif
+  TAB6_22[i, todos_efectos_22 %in% signif] <- 1
+  
+  # Modelo
+  ## Evaluación del diseño con réplicas y con cinco puntos centrales
+  mod1 <- lm(yrta~A*B, data=dis1_cod) 
+  ## Evaluación del diseño con réplicas y sin puntos centrales
+  mod2 <- lm(yrta~A*B, data=dis2_cod)  
+  ## Evaluación del diseño sin réplicas y con cinco puntos centrales
+  mod3 <- lm(yrta~A*B, data=dis3_cod)  
+  ## Evaluación del diseño sin réplicas y con dos puntos centrales
+  mod4 <- lm(yrta~A*B, data=dis4_cod)  
+ 
+  ## Almacenar los ECM
+  ECM_tab_22$dis1_22[i] <- (deviance(mod1) / df.residual(mod1))
+  ECM_tab_22$dis2_22[i] <- (deviance(mod2) / df.residual(mod2))
+  ECM_tab_22$dis3_22[i] <- (deviance(mod3) / df.residual(mod3))
+  ECM_tab_22$dis4_22[i] <- (deviance(mod4) / df.residual(mod4))
+  
+  # Lista de modelos y de tablas
+  mods <- list(mod1, mod2, mod3, mod4)
+  tabs <- list(TAB1_22, TAB2_22, TAB3_22, TAB4_22)
+
+  for (j in seq_along(mods)) {
+    tabs[[j]][i, ] <- sapply(1:3, function(k) {
+    as.integer(anova(mods[[j]])[k, 5] <= 0.05) })}
+  
+  ## Evaluación del diseño con réplicas y con cinco puntos centrales
+  TAB1_22 <- tabs[[1]] 
+  ## Evaluación del diseño con réplicas y sin puntos centrales
+  TAB2_22 <- tabs[[2]] 
+  ## Evaluación del diseño sin réplicas y con cinco puntos centrales
+  TAB3_22 <- tabs[[3]]  
+  ## Evaluación del diseño sin réplicas y con dos puntos centrales
+  TAB4_22 <- tabs[[4]]}  
+```
+
+### Potencia y error tipo I
+
+```{r}
+## Evaluación del diseño con réplicas y con cinco puntos centrales
+comp1_22 <- round(colSums(efectos_reales_22 == TAB1_22) / n * 100, 2)
+pot1_22 <- round(colSums((efectos_reales_22 == 1) & (TAB1_22 == 1)) /
+                colSums(efectos_reales_22 == 1) * 100, 2)
+err1_22 <- round(colSums((efectos_reales_22 == 0) & (TAB1_22 == 1)) /
+                colSums(efectos_reales_22 == 0) * 100, 2)
+
+## Evaluación del diseño con réplicas y sin puntos centrales
+comp2_22 <- round(colSums(efectos_reales_22 == TAB2_22) / n * 100, 2)
+pot2_22 <- round(colSums((efectos_reales_22 == 1) & (TAB2_22 == 1)) / 
+                colSums(efectos_reales_22 == 1) * 100, 2)
+err2_22 <- round(colSums((efectos_reales_22 == 0) & (TAB2_22 == 1)) / 
+                colSums(efectos_reales_22 == 0) * 100, 2)
+
+## Evaluación del diseño sin réplicas y con cinco puntos centrales
+comp3_22 <- round(colSums(efectos_reales_22 == TAB3_22) / n * 100, 2)
+pot3_22 <- round(colSums((efectos_reales_22 == 1) & (TAB3_22 == 1)) / 
+                colSums(efectos_reales_22 == 1) * 100, 2)
+err3_22 <- round(colSums((efectos_reales_22 == 0) & (TAB3_22 == 1)) / 
+                colSums(efectos_reales_22 == 0) * 100, 2)
+
+## Evaluación del diseño sin réplicas y con dos puntos centrales
+comp4_22 <- round(colSums(efectos_reales_22 == TAB4_22) / n * 100, 2)
+pot4_22 <- round(colSums((efectos_reales_22 == 1) & (TAB4_22 == 1)) / 
+                colSums(efectos_reales_22 == 1) * 100, 2)
+err4_22 <- round(colSums((efectos_reales_22 == 0) & (TAB4_22 == 1)) / 
+                colSums(efectos_reales_22 == 0) * 100, 2)
+
+## Evaluación del diseño sin réplica y sin puntos centrales
+comp6_22 <- round(colSums(efectos_reales_22 == TAB6_22) / n * 100, 2)
+pot6_22 <- round(colSums((efectos_reales_22 == 1) & (TAB6_22 == 1)) /
+                colSums(efectos_reales_22 == 1) * 100, 2)
+err6_22 <- round(colSums((efectos_reales_22 == 0) & (TAB6_22 == 1)) /
+                colSums(efectos_reales_22 == 0) * 100, 2)
+```
+
+## Diseño factorial completo $2^3$
+
+### Significancia de los efectos
+
+```{r}
+# Matrices
+TAB1_23 <- matrix(0, nrow = n, ncol = 7)
+TAB2_23 <- matrix(0, nrow = n, ncol = 7)
+TAB3_23 <- matrix(0, nrow = n, ncol = 7)
+TAB4_23 <- matrix(0, nrow = n, ncol = 7)
+TAB6_23 <- matrix(0, nrow = n, ncol = 7)
+efectos_reales_23 <- matrix(0, nrow = n, ncol = 7)
+
+names_23 <- c("A","B","C","A:B","A:C","B:C","A:B:C")
+colnames(TAB1_23) <- names_23
+colnames(TAB2_23) <- names_23
+colnames(TAB3_23) <- names_23
+colnames(TAB4_23) <- names_23
+colnames(TAB6_23) <- names_23
+colnames(efectos_reales_23) <- names_23
+
+# Tabla para completar los errores
+ECM_tab_23 <- data.frame(       
+    dis1_23 = numeric(n),
+    dis2_23 = numeric(n),
+    dis3_23 = numeric(n),
+    dis4_23 = numeric(n))
+
+# Bucle principal
+set.seed(3)
+for(i in seq_len(n)){
+  ## Efectos a evaluar en el este diseño
+  todos_efectos_23 <- c("A","B","C","A:B","A:C","B:C","A:B:C")
+  
+  # Selección de un número aleatorio entre 1 y 7
+  # dado que existen 7 efectos posibles a evaluar en este diseño.
+  n_ef <- sample(0:length(todos_efectos_23), 1)
+  
+  # Elección aleatoria _n_ef_ efectos que serán los efectos significativos
+  efectos_activos <- sample(todos_efectos_23, n_ef)
+  efectos_reales_23_vec <- setNames(rep(0, length(todos_efectos_23)), todos_efectos_23)
+  
+  # Asignación de un valor aleatorio a los efectos elegidos como significativos:
+  efectos_reales_23_vec[efectos_activos] <- sample(c(runif(n_ef, -7, -0.5), 
+                                                  runif(n_ef,  0.5, 7)),n_ef)
+  
+  # Guardar efectos reales como 1/0
+  efectos_reales_23[i,] <- c(
+    as.integer(efectos_reales_23_vec["A"]     != 0),
+    as.integer(efectos_reales_23_vec["B"]     != 0),
+    as.integer(efectos_reales_23_vec["C"]     != 0),
+    as.integer(efectos_reales_23_vec["A:B"]   != 0),
+    as.integer(efectos_reales_23_vec["A:C"]   != 0),
+    as.integer(efectos_reales_23_vec["B:C"]   != 0),
+    as.integer(efectos_reales_23_vec["A:B:C"] != 0))
+  
+  # Generar respuesta
+  
+  ## Diseño de variables codificadas con réplicas y con 5 puntos centrales
+ 
+  dis1_cod <- data.frame(
+    A = c(rep(c(-1,1),4), rep(c(-1,1),4), rep(0,5)),
+    B = c(rep(c(rep(-1,2), rep(1,2)), 4), rep(0,5)),
+    C = c(rep(-1,4), rep(1,4), rep(-1,4), rep(1,4), rep(0,5)))
+ 
+  n_corridas <- nrow(dis1_cod)
+  
+  ## Generación del error
+  error <- rnorm(n_corridas, 0, 2)       #error ~ (mu = 0, sigma^2 = 2^2)
+  
+  ## Generación de la respuesta
+  yrta <- 50 +
+    efectos_reales_23_vec["A"]     * dis1_cod$A +
+    efectos_reales_23_vec["B"]     * dis1_cod$B +
+    efectos_reales_23_vec["C"]     * dis1_cod$C +
+    efectos_reales_23_vec["A:B"]   * dis1_cod$A * dis1_cod$B +
+    efectos_reales_23_vec["A:C"]   * dis1_cod$A * dis1_cod$C +
+    efectos_reales_23_vec["B:C"]   * dis1_cod$B * dis1_cod$C +
+    efectos_reales_23_vec["A:B:C"] * dis1_cod$A * dis1_cod$B * dis1_cod$C +
+    error
+  
+  ## Asignación de la respuesta al dis1_cod
+  dis1_cod <- cbind(dis1_cod, yrta)
+ 
+  ## Diseño con réplicas y sin puntos centrales
+  
+  dis2_cod <- dis1_cod[-c(17:21),]
+  
+  ## Diseño sin réplica y con cinco puntos centrales
+  rep1 <- c(1:8)
+  rep2 <- c(9:16)
+  seleccion_name <- sample(c("rep1","rep2"),1)   #repetición a eliminar
+  sel <- get(seleccion_name)
+  
+  dis3_cod <- dis1_cod[-sel,]      
+  
+  ## Diseño sin réplica y con dos puntos centrales
+  rep1 <- c(1:8)
+  rep2 <- c(9:16)
+  seleccion_name <- sample(c("rep1","rep2"),1)   #repetición a eliminar
+  sel <- get(seleccion_name)
+  rep_pc <- sample(c(17:21),3)                   #punto central a eliminar
+  
+  dis4_cod <- dis1_cod[-c(sel,rep_pc),]     
+  
+  ## Diseño sin réplica y sin puntos centrales
+  rep1 <- c(1:8, 17:21)
+  rep2 <- c(9:16, 17:21)
+  seleccion_name <- sample(c("rep1","rep2"),1)   #repetición a eliminar
+  sel <- get(seleccion_name)
+  
+  dis6_cod <- dis1_cod[-sel,] 
+  
+  mod6 <- lm(yrta~A*B*C, data=dis6_cod)
+  
+  graf <- suppressMessages(halfnormal(mod6, alpha = 0.05, plot=FALSE, method="Lenth"))
+  signif <- graf$signif
+  TAB6_23[i, todos_efectos_23 %in% signif] <- 1
+
+  # Modelo
+  ## Evaluación del diseño con réplicas y con cinco puntos centrales
+  mod1 <- lm(yrta~A*B*C, data=dis1_cod)  
+  ## Evaluación del diseño con réplicas y sin puntos centrales
+  mod2 <- lm(yrta~A*B*C, data=dis2_cod)  
+  ## Evaluación del diseño sin réplicas y con cinco puntos centrales
+  mod3 <- lm(yrta~A*B*C, data=dis3_cod)  
+  ## Evaluación del diseño sin réplicas y con dos puntos centrales
+  mod4 <- lm(yrta~A*B*C, data=dis4_cod)  
+ 
+  ## Almacenar los ECM
+  ECM_tab_23$dis1_23[i] <- (deviance(mod1) / df.residual(mod1))
+  ECM_tab_23$dis2_23[i] <- (deviance(mod2) / df.residual(mod2))
+  ECM_tab_23$dis3_23[i] <- (deviance(mod3) / df.residual(mod3))
+  ECM_tab_23$dis4_23[i] <- (deviance(mod4) / df.residual(mod4))
+  
+  # Lista de modelos y de tablas
+  mods <- list(mod1, mod2, mod3, mod4)
+  tabs <- list(TAB1_23, TAB2_23, TAB3_23, TAB4_23)
+
+  for (j in seq_along(mods)) {
+    tabs[[j]][i, ] <- sapply(1:7, function(k) {
+    as.integer(anova(mods[[j]])[k, 5] <= 0.05) })}
+  
+  ## Evaluación del diseño con réplicas y con cinco puntos centrales
+  TAB1_23 <- tabs[[1]] 
+  ## Evaluación del diseño con réplicas y sin puntos centrales
+  TAB2_23 <- tabs[[2]] 
+  ## Evaluación del diseño sin réplicas y con cinco puntos centrales
+  TAB3_23 <- tabs[[3]]  
+  ## Evaluación del diseño sin réplicas y con dos puntos centrales
+  TAB4_23 <- tabs[[4]]}  
+```
+
+### Potencia y error tipo I
+
+```{r}
+## Evaluación del diseño con réplicas y con cinco puntos centrales
+comp1_23 <- round(colSums(efectos_reales_23 == TAB1_23) / n * 100, 2)
+pot1_23 <- round(colSums((efectos_reales_23 == 1) & (TAB1_23 == 1)) /
+                colSums(efectos_reales_23 == 1) * 100, 2)
+err1_23 <- round(colSums((efectos_reales_23 == 0) & (TAB1_23 == 1)) /
+                colSums(efectos_reales_23 == 0) * 100, 2)
+
+## Evaluación del diseño con réplicas y sin puntos centrales
+comp2_23 <- round(colSums(efectos_reales_23 == TAB2_23) / n * 100, 2)
+pot2_23 <- round(colSums((efectos_reales_23 == 1) & (TAB2_23 == 1)) / 
+                colSums(efectos_reales_23 == 1) * 100, 2)
+err2_23 <- round(colSums((efectos_reales_23 == 0) & (TAB2_23 == 1)) / 
+                colSums(efectos_reales_23 == 0) * 100, 2)
+
+## Evaluación del diseño sin réplicas y con cinco puntos centrales
+comp3_23 <- round(colSums(efectos_reales_23 == TAB3_23) / n * 100, 2)
+pot3_23 <- round(colSums((efectos_reales_23 == 1) & (TAB3_23 == 1)) / 
+                colSums(efectos_reales_23 == 1) * 100, 2)
+err3_23 <- round(colSums((efectos_reales_23 == 0) & (TAB3_23 == 1)) / 
+                colSums(efectos_reales_23 == 0) * 100, 2)
+
+## Evaluación del diseño sin réplicas y con dos puntos centrales
+comp4_23 <- round(colSums(efectos_reales_23 == TAB4_23) / n * 100, 2)
+pot4_23 <- round(colSums((efectos_reales_23 == 1) & (TAB4_23 == 1)) / 
+                colSums(efectos_reales_23 == 1) * 100, 2)
+err4_23 <- round(colSums((efectos_reales_23 == 0) & (TAB4_23 == 1)) / 
+                colSums(efectos_reales_23 == 0) * 100, 2)
+
+## Evaluación del diseño sin réplicas y sin puntos centrales
+comp6_23 <- round(colSums(efectos_reales_23 == TAB6_23) / n * 100, 2)
+pot6_23 <- round(colSums((efectos_reales_23 == 1) & (TAB6_23 == 1)) /
+                colSums(efectos_reales_23 == 1) * 100, 2)
+err6_23 <- round(colSums((efectos_reales_23 == 0) & (TAB6_23 == 1)) /
+                colSums(efectos_reales_23 == 0) * 100, 2)
+```
+
+## Diseño factorial completo $2^4$
+
+### Significancia de los efectos
+
+```{r}
+# Matrices
+TAB1_24 <- matrix(0, nrow = n, ncol = 15)
+TAB2_24 <- matrix(0, nrow = n, ncol = 15)
+TAB3_24 <- matrix(0, nrow = n, ncol = 15)
+TAB4_24 <- matrix(0, nrow = n, ncol = 15)
+TAB6_24 <- matrix(0, nrow = n, ncol = 15)
+efectos_reales_24 <- matrix(0, nrow = n, ncol = 15)
+
+names_24 <- c("A", "B", "C", "D",
+  "A:B", "A:C", "B:C", "A:D", "B:D", "C:D",
+  "A:B:C", "A:B:D", "A:C:D", "B:C:D",
+  "A:B:C:D")
+
+colnames(TAB1_24) <- names_24
+colnames(TAB2_24) <- names_24
+colnames(TAB3_24) <- names_24
+colnames(TAB4_24) <- names_24
+colnames(TAB6_24) <- names_24
+colnames(efectos_reales_24) <- names_24
+
+# Tabla para completar los errores
+ECM_tab_24 <- data.frame(       
+    dis1_24 = numeric(n),
+    dis2_24 = numeric(n),
+    dis3_24 = numeric(n),
+    dis4_24 = numeric(n))
+
+# Bucle principal
+set.seed(3)
+for(i in seq_len(n)){
+  ## Efectos a evaluar en el este diseño
+  todos_efectos_24 <- c("A", "B", "C", "D",
+  "A:B", "A:C", "B:C", "A:D", "B:D", "C:D",
+  "A:B:C", "A:B:D", "A:C:D", "B:C:D",
+  "A:B:C:D")
+  
+  # Selección de un número aleatorio entre 1 y 15
+  # dado que existen 15 efectos posibles a evaluar en este diseño.
+  n_ef <- sample(0:length(todos_efectos_24), 1)
+  
+  # Elección aleatoria _n_ef_ efectos que serán los efectos significativos
+  efectos_activos <- sample(todos_efectos_24, n_ef)
+  efectos_reales_24_vec <- setNames(rep(0, length(todos_efectos_24)), todos_efectos_24)
+  
+  # Asignación de un valor aleatorio a los efectos elegidos como significativos:
+  efectos_reales_24_vec[efectos_activos] <- sample(c(runif(n_ef, -7, -0.5), 
+                                                  runif(n_ef,  0.5, 7)),n_ef)
+  
+  # Guardar efectos reales como 1/0
+  efectos_reales_24[i, ] <- c(
+    as.integer(efectos_reales_24_vec["A"]       != 0),
+    as.integer(efectos_reales_24_vec["B"]       != 0),
+    as.integer(efectos_reales_24_vec["C"]       != 0),
+    as.integer(efectos_reales_24_vec["D"]       != 0),
+    as.integer(efectos_reales_24_vec["A:B"]     != 0),
+    as.integer(efectos_reales_24_vec["A:C"]     != 0),
+    as.integer(efectos_reales_24_vec["B:C"]     != 0),
+    as.integer(efectos_reales_24_vec["A:D"]     != 0),
+    as.integer(efectos_reales_24_vec["B:D"]     != 0),
+    as.integer(efectos_reales_24_vec["C:D"]     != 0),
+    as.integer(efectos_reales_24_vec["A:B:C"]   != 0),
+    as.integer(efectos_reales_24_vec["A:B:D"]   != 0),
+    as.integer(efectos_reales_24_vec["A:C:D"]   != 0),
+    as.integer(efectos_reales_24_vec["B:C:D"]   != 0),
+    as.integer(efectos_reales_24_vec["A:B:C:D"] != 0))
+    
+  # Generar respuesta
+  
+  ## Diseño de variables codificadas con réplicas y con 5 puntos centrales
+ 
+  dis1_cod <- data.frame(
+      A = c(rep(c(-1,1), 8), rep(c(-1,1), 8), rep(0,5)),
+      B = c(rep(c(rep(-1,2), rep(1,2)), 4),
+            rep(c(rep(-1,2), rep(1,2)), 4),
+            rep(0,5)),
+      C = c(rep(c(rep(-1,4), rep(1,4)), 2),
+            rep(c(rep(-1,4), rep(1,4)), 2),
+            rep(0,5)),
+      D = c(rep(-1,8), rep(1,8),
+            rep(-1,8), rep(1,8),
+            rep(0,5)))
+ 
+  n_corridas <- nrow(dis1_cod)
+  
+  ## Generación del error
+  error <- rnorm(n_corridas, 0, 2)       #error ~ (mu = 0, sigma^2 = 2^2)
+  
+  ## Generación de la respuesta
+  yrta <- 50 +
+  efectos_reales_24_vec["A"]       * dis1_cod$A +
+  efectos_reales_24_vec["B"]       * dis1_cod$B +
+  efectos_reales_24_vec["C"]       * dis1_cod$C +
+  efectos_reales_24_vec["D"]       * dis1_cod$D +
+  efectos_reales_24_vec["A:B"]     * dis1_cod$A * dis1_cod$B +
+  efectos_reales_24_vec["A:C"]     * dis1_cod$A * dis1_cod$C +
+  efectos_reales_24_vec["B:C"]     * dis1_cod$B * dis1_cod$C +
+  efectos_reales_24_vec["A:D"]     * dis1_cod$A * dis1_cod$D +
+  efectos_reales_24_vec["B:D"]     * dis1_cod$B * dis1_cod$D +
+  efectos_reales_24_vec["C:D"]     * dis1_cod$C * dis1_cod$D +
+  efectos_reales_24_vec["A:B:C"]   * dis1_cod$A * dis1_cod$B * dis1_cod$C +
+  efectos_reales_24_vec["A:B:D"]   * dis1_cod$A * dis1_cod$B * dis1_cod$D +
+  efectos_reales_24_vec["A:C:D"]   * dis1_cod$A * dis1_cod$C * dis1_cod$D +
+  efectos_reales_24_vec["B:C:D"]   * dis1_cod$B * dis1_cod$C * dis1_cod$D +
+  efectos_reales_24_vec["A:B:C:D"] * dis1_cod$A * dis1_cod$B * dis1_cod$C * dis1_cod$D +
+  error
+  
+  ## Asignación de la respuesta al dis1_cod
+  dis1_cod <- cbind(dis1_cod, yrta)
+ 
+  ## Diseño con réplicas y sin puntos centrales
+  
+  dis2_cod <- dis1_cod[-c(33:37),]
+  
+  ## Diseño sin réplica y con cinco puntos centrales
+  rep1 <- c(1:16)
+  rep2 <- c(17:32)
+  seleccion_name <- sample(c("rep1","rep2"),1)   #repetición a eliminar
+  sel <- get(seleccion_name)
+  
+  dis3_cod <- dis1_cod[-sel,]      
+  
+  ## Diseño sin réplica y con dos puntos centrales
+  rep1 <- c(1:16)
+  rep2 <- c(17:32)
+  seleccion_name <- sample(c("rep1","rep2"),1)   #repetición a eliminar
+  sel <- get(seleccion_name)
+  rep_pc <- sample(c(33:37),3)                   #punto central a eliminar
+  
+  dis4_cod <- dis1_cod[-c(sel,rep_pc),]     
+  
+  ## Diseño sin réplica y sin puntos centrales
+  rep1 <- c(1:16, 33:37)
+  rep2 <- c(17:32, 33:37)
+  seleccion_name <- sample(c("rep1","rep2"),1)   #repetición a eliminar
+  sel <- get(seleccion_name)
+  
+  dis6_cod <- dis1_cod[-sel,] 
+  
+  mod6 <- lm(yrta~A*B*C*D, data=dis6_cod)
+  
+  graf <- suppressMessages(halfnormal(mod6, alpha = 0.05, plot=FALSE, method="Lenth"))
+  signif <- graf$signif
+  TAB6_24[i, todos_efectos_24 %in% signif] <- 1
+  
+  # Modelo
+  ## Evaluación del diseño con réplicas y con cinco puntos centrales
+  mod1 <- lm(yrta~A*B*C*D, data=dis1_cod)  
+  ## Evaluación del diseño con réplicas y sin puntos centrales
+  mod2 <- lm(yrta~A*B*C*D, data=dis2_cod)  
+  ## Evaluación del diseño sin réplicas y con cinco puntos centrales
+  mod3 <- lm(yrta~A*B*C*D, data=dis3_cod)  
+  ## Evaluación del diseño sin réplicas y con dos puntos centrales
+  mod4 <- lm(yrta~A*B*C*D, data=dis4_cod)  
+  ## Almacenar los ECM
+  ECM_tab_24$dis1_24[i] <- (deviance(mod1) / df.residual(mod1))
+  ECM_tab_24$dis2_24[i] <- (deviance(mod2) / df.residual(mod2))
+  ECM_tab_24$dis3_24[i] <- (deviance(mod3) / df.residual(mod3))
+  ECM_tab_24$dis4_24[i] <- (deviance(mod4) / df.residual(mod4))
+  
+  # Lista de modelos y de tablas
+  mods <- list(mod1, mod2, mod3, mod4)
+  tabs <- list(TAB1_24, TAB2_24, TAB3_24, TAB4_24)
+
+  for (j in seq_along(mods)) {
+    tabs[[j]][i, ] <- sapply(1:15, function(k) {
+      as.integer(anova(mods[[j]])[k, 5] <= 0.05) })}
+  
+  ## Diseño con réplicas y con cinco puntos centrales
+  TAB1_24 <- tabs[[1]] 
+  ## Evaluación del diseño con réplicas y sin puntos centrales
+  TAB2_24 <- tabs[[2]] 
+  ## Evaluación del diseño sin réplicas y con cinco puntos centrales
+  TAB3_24 <- tabs[[3]]  
+  ## Evaluación del diseño sin réplicas y con dos puntos centrales
+  TAB4_24 <- tabs[[4]]}  
+```
+
+### Potencia y error tipo I
+
+```{r}
+## Evaluación del diseño con réplicas y con cinco puntos centrales
+comp1_24 <- round(colSums(efectos_reales_24 == TAB1_24) / n * 100, 2)
+pot1_24 <- round(colSums((efectos_reales_24 == 1) & (TAB1_24 == 1)) /
+                colSums(efectos_reales_24 == 1) * 100, 2)
+err1_24 <- round(colSums((efectos_reales_24 == 0) & (TAB1_24 == 1)) /
+                colSums(efectos_reales_24 == 0) * 100, 2)
+
+## Evaluación del diseño con réplicas y sin puntos centrales
+comp2_24 <- round(colSums(efectos_reales_24 == TAB2_24) / n * 100, 2)
+pot2_24 <- round(colSums((efectos_reales_24 == 1) & (TAB2_24 == 1)) / 
+                colSums(efectos_reales_24 == 1) * 100, 2)
+err2_24 <- round(colSums((efectos_reales_24 == 0) & (TAB2_24 == 1)) / 
+                colSums(efectos_reales_24 == 0) * 100, 2)
+
+## Evaluación del diseño sin réplicas y con cinco puntos centrales
+comp3_24 <- round(colSums(efectos_reales_24 == TAB3_24) / n * 100, 2)
+pot3_24 <- round(colSums((efectos_reales_24 == 1) & (TAB3_24 == 1)) / 
+                colSums(efectos_reales_24 == 1) * 100, 2)
+err3_24 <- round(colSums((efectos_reales_24 == 0) & (TAB3_24 == 1)) / 
+                colSums(efectos_reales_24 == 0) * 100, 2)
+
+## Evaluación del diseño sin réplicas y con dos puntos centrales
+comp4_24 <- round(colSums(efectos_reales_24 == TAB4_24) / n * 100, 2)
+pot4_24 <- round(colSums((efectos_reales_24 == 1) & (TAB4_24 == 1)) / 
+                colSums(efectos_reales_24 == 1) * 100, 2)
+err4_24 <- round(colSums((efectos_reales_24 == 0) & (TAB4_24 == 1)) / 
+                colSums(efectos_reales_24 == 0) * 100, 2)
+
+## Evaluación del diseño sin réplicas y sin puntos centrales
+comp6_24 <- round(colSums(efectos_reales_24 == TAB6_24) / n * 100, 2)
+pot6_24 <- round(colSums((efectos_reales_24 == 1) & (TAB6_24 == 1)) /
+                colSums(efectos_reales_24 == 1) * 100, 2)
+err6_24 <- round(colSums((efectos_reales_24 == 0) & (TAB6_24 == 1)) /
+                colSums(efectos_reales_24 == 0) * 100, 2)
+```
+
+## Diseño factorial completo $2^5$
+
+### Significancia de los efectos
+
+```{r}
+# Matrices
+TAB1_25 <- matrix(NA, nrow = n, ncol = 31)
+TAB2_25 <- matrix(NA, nrow = n, ncol = 31)
+TAB3_25 <- matrix(NA, nrow = n, ncol = 31)
+TAB4_25 <- matrix(NA, nrow = n, ncol = 31)
+TAB6_25 <- matrix(0, nrow = n, ncol = 31)
+efectos_reales_25 <- matrix(0, nrow = n, ncol = 31)
+
+names_25 <- c("A","B","C","D","E", 
+           "A:B","A:C","B:C","A:D","B:D","C:D","A:E","B:E","C:E","D:E",
+           "A:B:C","A:B:D","A:C:D","B:C:D","A:B:E","A:C:E","B:C:E","A:D:E","B:D:E","C:D:E",
+           "A:B:C:D","A:B:C:E","A:B:D:E","A:C:D:E","B:C:D:E",
+           "A:B:C:D:E")
+
+colnames(TAB1_25) <- names_25
+colnames(TAB2_25) <- names_25
+colnames(TAB3_25) <- names_25
+colnames(TAB4_25) <- names_25
+colnames(TAB6_25) <- names_25
+colnames(efectos_reales_25) <- names_25
+
+# Tabla para completar los errores
+ECM_tab_25 <- data.frame(       
+    dis1_25 = numeric(n),
+    dis2_25 = numeric(n),
+    dis3_25 = numeric(n),
+    dis4_25 = numeric(n))
+
+# Bucle principal
+set.seed(3)
+for(i in seq_len(n)){
+  ## Efectos a evaluar en el este diseño
+  todos_efectos_25 <- c("A","B","C","D","E", 
+           "A:B","A:C","B:C","A:D","B:D","C:D","A:E","B:E","C:E","D:E",
+           "A:B:C","A:B:D","A:C:D","B:C:D","A:B:E","A:C:E","B:C:E","A:D:E","B:D:E","C:D:E",
+           "A:B:C:D","A:B:C:E","A:B:D:E","A:C:D:E","B:C:D:E",
+           "A:B:C:D:E")
+  
+  # Selección de un número aleatorio entre 1 y 31
+  # dado que existen 31 efectos posibles a evaluar en este diseño.
+  n_ef <- sample(0:length(todos_efectos_25), 1)
+  
+  # Elección aleatoria _n_ef_ efectos que serán los efectos significativos
+  efectos_activos <- sample(todos_efectos_25, n_ef)
+  efectos_reales_25_vec <- setNames(rep(0, length(todos_efectos_25)), todos_efectos_25)
+  
+  # Asignación de un valor aleatorio a los efectos elegidos como significativos:
+  efectos_reales_25_vec[efectos_activos] <- sample(c(runif(n_ef, -7, -0.5), 
+                                                  runif(n_ef,  0.5, 7)),n_ef)
+  
+  # Guardar efectos reales como 1/0
+  efectos_reales_25[i, ] <- c(
+    as.integer(efectos_reales_25_vec["A"]    != 0),
+    as.integer(efectos_reales_25_vec["B"]    != 0),
+    as.integer(efectos_reales_25_vec["C"]    != 0),
+    as.integer(efectos_reales_25_vec["D"]    != 0),
+    as.integer(efectos_reales_25_vec["E"]    != 0),
+    
+    as.integer(efectos_reales_25_vec["A:B"]   != 0),
+    as.integer(efectos_reales_25_vec["A:C"]   != 0),
+    as.integer(efectos_reales_25_vec["B:C"]   != 0),
+    as.integer(efectos_reales_25_vec["A:D"]   != 0),
+    as.integer(efectos_reales_25_vec["B:D"]   != 0),
+    as.integer(efectos_reales_25_vec["C:D"]   != 0),
+    as.integer(efectos_reales_25_vec["A:E"]   != 0),
+    as.integer(efectos_reales_25_vec["B:E"]   != 0),
+    as.integer(efectos_reales_25_vec["C:E"]   != 0),
+    as.integer(efectos_reales_25_vec["D:E"]   != 0),
+    
+    as.integer(efectos_reales_25_vec["A:B:C"]    != 0),
+    as.integer(efectos_reales_25_vec["A:B:D"]    != 0),
+    as.integer(efectos_reales_25_vec["A:C:D"]    != 0),
+    as.integer(efectos_reales_25_vec["B:C:D"]    != 0),
+    as.integer(efectos_reales_25_vec["A:B:E"]    != 0),
+    as.integer(efectos_reales_25_vec["A:C:E"]    != 0),
+    as.integer(efectos_reales_25_vec["B:C:E"]    != 0),
+    as.integer(efectos_reales_25_vec["A:D:E"]    != 0),
+    as.integer(efectos_reales_25_vec["B:D:E"]    != 0),
+    as.integer(efectos_reales_25_vec["C:D:E"]    != 0),
+    
+    as.integer(efectos_reales_25_vec["A:B:C:D"]  != 0),
+    as.integer(efectos_reales_25_vec["A:B:C:E"]  != 0),
+    as.integer(efectos_reales_25_vec["A:B:D:E"]  != 0),
+    as.integer(efectos_reales_25_vec["A:C:D:E"]  != 0),
+    as.integer(efectos_reales_25_vec["B:C:D:E"]  != 0),
+    
+    as.integer(efectos_reales_25_vec["A:B:C:D:E"]!= 0))
+    
+  # Generar respuesta
+  
+  ## Diseño de variables codificadas con réplicas y con 5 puntos centrales
+ 
+  dis1_cod <- data.frame(
+  A = c(rep(c(-1,1),16), rep(c(-1,1),16), rep(0,5)),
+  B = c(rep(c(rep(-1,2), rep(1,2)),8),  rep(c(rep(-1,2), rep(1,2)),8),rep(0,5)),
+  C = c(rep(c(rep(-1,4), rep(1,4)),4), rep(c(rep(-1,4), rep(1,4)),4),rep(0,5)),
+  D = c(rep(c(rep(-1,8), rep(1,8)),2), rep(c(rep(-1,8), rep(1,8)),2),rep(0,5)),
+  E = c(rep(-1,16), rep(1,16), rep(-1,16), rep(1,16), rep(0,5)))
+ 
+  n_corridas <- nrow(dis1_cod)
+  
+  ## Generación del error
+  error <- rnorm(n_corridas, 0, 2)       #error ~ (mu = 0, sigma^2 = 2^2)
+  
+  ## Generación de la respuesta
+  yrta <- 50 +
+  efectos_reales_25_vec["A"]     * dis1_cod$A +
+  efectos_reales_25_vec["B"]     * dis1_cod$B +
+  efectos_reales_25_vec["C"]     * dis1_cod$C +
+  efectos_reales_25_vec["D"]     * dis1_cod$D +
+  efectos_reales_25_vec["E"]     * dis1_cod$E +
+  
+  efectos_reales_25_vec["A:B"]    * dis1_cod$A * dis1_cod$B +
+  efectos_reales_25_vec["A:C"]    * dis1_cod$A * dis1_cod$C +
+  efectos_reales_25_vec["B:C"]    * dis1_cod$B * dis1_cod$C +
+  efectos_reales_25_vec["A:D"]    * dis1_cod$A * dis1_cod$D +
+  efectos_reales_25_vec["B:D"]    * dis1_cod$B * dis1_cod$D +
+  efectos_reales_25_vec["C:D"]    * dis1_cod$C * dis1_cod$D +
+  efectos_reales_25_vec["A:E"]    * dis1_cod$A * dis1_cod$E +
+  efectos_reales_25_vec["B:E"]    * dis1_cod$B * dis1_cod$E +
+  efectos_reales_25_vec["C:E"]    * dis1_cod$C * dis1_cod$E +
+  efectos_reales_25_vec["D:E"]    * dis1_cod$D * dis1_cod$E +
+  
+  efectos_reales_25_vec["A:B:C"]   * dis1_cod$A * dis1_cod$B * dis1_cod$C +
+  efectos_reales_25_vec["A:B:D"]   * dis1_cod$A * dis1_cod$B * dis1_cod$D +
+  efectos_reales_25_vec["A:C:D"]   * dis1_cod$A * dis1_cod$C * dis1_cod$D +
+  efectos_reales_25_vec["B:C:D"]   * dis1_cod$B * dis1_cod$C * dis1_cod$D +
+  efectos_reales_25_vec["A:B:E"]   * dis1_cod$A * dis1_cod$B * dis1_cod$E +
+  efectos_reales_25_vec["A:C:E"]   * dis1_cod$A * dis1_cod$C * dis1_cod$E +
+  efectos_reales_25_vec["B:C:E"]   * dis1_cod$B * dis1_cod$C * dis1_cod$E +
+  efectos_reales_25_vec["A:D:E"]   * dis1_cod$A * dis1_cod$D * dis1_cod$E +
+  efectos_reales_25_vec["B:D:E"]   * dis1_cod$B * dis1_cod$D * dis1_cod$E +
+  efectos_reales_25_vec["C:D:E"]   * dis1_cod$C * dis1_cod$D * dis1_cod$E +
+  
+  efectos_reales_25_vec["A:B:C:D"]  * dis1_cod$A * dis1_cod$B * dis1_cod$C * dis1_cod$D +
+  efectos_reales_25_vec["A:B:C:E"]  * dis1_cod$A * dis1_cod$B * dis1_cod$C * dis1_cod$E +
+  efectos_reales_25_vec["A:B:D:E"]  * dis1_cod$A * dis1_cod$B * dis1_cod$D * dis1_cod$E +
+  efectos_reales_25_vec["A:C:D:E"]  * dis1_cod$A * dis1_cod$C * dis1_cod$D * dis1_cod$E +
+  efectos_reales_25_vec["B:C:D:E"]  * dis1_cod$B * dis1_cod$C * dis1_cod$D * dis1_cod$E +
+  
+  efectos_reales_25_vec["A:B:C:D:E"] * dis1_cod$A * dis1_cod$B * dis1_cod$C * dis1_cod$D * dis1_cod$E +
+  
+  error
+  
+  ## Asignación de la respuesta al dis1_cod
+  dis1_cod <- cbind(dis1_cod, yrta)
+ 
+  ## Diseño con réplicas y sin puntos centrales
+  
+  dis2_cod <- dis1_cod[-c(65:69),]
+  
+  ## Diseño sin réplica y con cinco puntos centrales
+  rep1 <- c(1:32)
+  rep2 <- c(33:64)
+  seleccion_name <- sample(c("rep1","rep2"),1)   #repetición a eliminar
+  sel <- get(seleccion_name)
+  
+  dis3_cod <- dis1_cod[-sel,]      
+  
+  ## Diseño sin réplica y con dos puntos centrales
+  rep1 <- c(1:32)
+  rep2 <- c(33:64)
+  seleccion_name <- sample(c("rep1","rep2"),1)   #repetición a eliminar
+  sel <- get(seleccion_name)
+  rep_pc <- sample(c(65:69),3)                   #punto central a eliminar
+  
+  dis4_cod <- dis1_cod[-c(sel,rep_pc),]     
+  
+  ## Diseño sin réplicas y sin puntos centrales
+  rep1 <- c(1:32, 65:69)
+  rep2 <- c(33:64, 65:69)
+  seleccion_name <- sample(c("rep1","rep2"),1)   #repetición a eliminar
+  sel <- get(seleccion_name)
+
+  dis6_cod <- dis1_cod[-sel,] 
+  
+  mod6 <- lm(yrta~A*B*C*D*E, data=dis6_cod)
+  
+  graf <- suppressMessages(halfnormal(mod6, alpha = 0.05, plot=FALSE, method="Lenth"))
+  signif <- graf$signif
+  TAB6_25[i, todos_efectos_25 %in% signif] <- 1
+  
+  # Modelo
+  ## Evaluación del diseño con réplicas y con cinco puntos centrales
+  mod1 <- lm(yrta~A*B*C*D*E, data=dis1_cod)  
+  ## Evaluación del diseño con réplicas y sin puntos centrales
+  mod2 <- lm(yrta~A*B*C*D*E, data=dis2_cod)  
+  ## Evaluación del diseño sin réplicas y con cinco puntos centrales
+  mod3 <- lm(yrta~A*B*C*D*E, data=dis3_cod)  
+  ## Evaluación del diseño sin réplicas y con dos puntos centrales
+  mod4 <- lm(yrta~A*B*C*D*E, data=dis4_cod)  
+  ## Almacenar los ECM
+  ECM_tab_25$dis1_25[i] <- (deviance(mod1) / df.residual(mod1))
+  ECM_tab_25$dis2_25[i] <- (deviance(mod2) / df.residual(mod2))
+  ECM_tab_25$dis3_25[i] <- (deviance(mod3) / df.residual(mod3))
+  ECM_tab_25$dis4_25[i] <- (deviance(mod4) / df.residual(mod4))
+  
+  # Lista de modelos y de tablas
+  mods <- list(mod1, mod2, mod3, mod4)
+  tabs <- list(TAB1_25, TAB2_25, TAB3_25, TAB4_25)
+
+  for (j in seq_along(mods)) {
+    tabs[[j]][i, ] <- sapply(1:31, function(k) {
+      as.integer(anova(mods[[j]])[k, 5] <= 0.05) })}
+  
+  ## Diseño con réplicas y con cinco puntos centrales
+  TAB1_25 <- tabs[[1]] 
+  ## Evaluación del diseño con réplicas y sin puntos centrales
+  TAB2_25 <- tabs[[2]] 
+  ## Evaluación del diseño sin réplicas y con cinco puntos centrales
+  TAB3_25 <- tabs[[3]]  
+  ## Evaluación del diseño sin réplicas y con dos puntos centrales
+  TAB4_25 <- tabs[[4]]}  
+```
+
+### Potencia y error tipo I
+
+```{r}
+## Evaluación del diseño con réplicas y con cinco puntos centrales
+comp1_25 <- round(colSums(efectos_reales_25 == TAB1_25) / n * 100, 2)
+pot1_25 <- round(colSums((efectos_reales_25 == 1) & (TAB1_25 == 1)) /
+                colSums(efectos_reales_25 == 1) * 100, 2)
+err1_25 <- round(colSums((efectos_reales_25 == 0) & (TAB1_25 == 1)) /
+                colSums(efectos_reales_25 == 0) * 100, 2)
+
+## Evaluación del diseño con réplicas y sin puntos centrales
+comp2_25 <- round(colSums(efectos_reales_25 == TAB2_25) / n * 100, 2)
+pot2_25 <- round(colSums((efectos_reales_25 == 1) & (TAB2_25 == 1)) / 
+                colSums(efectos_reales_25 == 1) * 100, 2)
+err2_25 <- round(colSums((efectos_reales_25 == 0) & (TAB2_25 == 1)) / 
+                colSums(efectos_reales_25 == 0) * 100, 2)
+
+## Evaluación del diseño sin réplicas y con cinco puntos centrales
+comp3_25 <- round(colSums(efectos_reales_25 == TAB3_25) / n * 100, 2)
+pot3_25 <- round(colSums((efectos_reales_25 == 1) & (TAB3_25 == 1)) / 
+                colSums(efectos_reales_25 == 1) * 100, 2)
+err3_25 <- round(colSums((efectos_reales_25 == 0) & (TAB3_25 == 1)) / 
+                colSums(efectos_reales_25 == 0) * 100, 2)
+
+## Evaluación del diseño sin réplicas y con dos puntos centrales
+comp4_25 <- round(colSums(efectos_reales_25 == TAB4_25) / n * 100, 2)
+pot4_25 <- round(colSums((efectos_reales_25 == 1) & (TAB4_25 == 1)) / 
+                colSums(efectos_reales_25 == 1) * 100, 2)
+err4_25 <- round(colSums((efectos_reales_25 == 0) & (TAB4_25 == 1)) / 
+                colSums(efectos_reales_25 == 0) * 100, 2)
+
+## Evaluación del diseño sin réplicas y sin puntos centrales
+comp6_25 <- round(colSums(efectos_reales_25 == TAB6_25) / n * 100, 2)
+pot6_25 <- round(colSums((efectos_reales_25 == 1) & (TAB6_25 == 1)) /
+                colSums(efectos_reales_25 == 1) * 100, 2)
+err6_25 <- round(colSums((efectos_reales_25 == 0) & (TAB6_25 == 1)) /
+                colSums(efectos_reales_25 == 0) * 100, 2)
+```
+
+## Evaluación del Error Cuadrático Medio (ECM) por medidas repetidas
+
+Para la evaluación del Error Cuadrático Medio (ECM) se diseñó la siguiente función:
+
+```{r}
+# X: Matriz que incluye los datos para comparar que debe estar organizada así
+# C: Matriz de contrastes
+# alpha: Nivel de significancia
+
+Hotelling <- function(X, C, alpha) {
+  
+  ## Cálculo de la $T^2$ Hotelling
+  mu <- colMeans(X)
+  n <- nrow(X)   # Número de individuos (filas de X)
+  p <- ncol(X)   # Número de tratamientos (columnas de X)
+  
+  # Matriz identidad e I - (1/n)11'
+  In <- diag(n)
+  uno <- matrix(1, n, n)   # 1 x t(1)
+  H <- In - (1/n) * uno
+  
+  # Calculo de S
+  S <- (1/(n-1)) * t(X) %*% H %*% X
+  
+  # Cálculo de T2
+  T2 <- n*(t(C%*%mu))%*%(solve(C%*%S%*%t(C)))%*%(C%*%mu)
+  
+  # F calculado
+  Fcal <- (n - p + 1) / ((n - 1)*(p - 1)) * T2
+  
+  # F tabulado (crítico)
+  gl1 <- p-1
+  gl2 <- n-p+1
+  
+  # Valor crítico F(0.05; p-1, n-p+1)
+  F_critico <- qf(1-alpha, df1 = gl1, df2 = gl2)
+
+  return(list(
+    T2 = as.numeric(T2),
+    Fcal = as.numeric(Fcal),
+    F_critico = F_critico))
+}
+```
+
+# *Resultados*
+
+## Diseño factorial completo $2^2$
+
+```{r}
+#| echo: FALSE
+#| warnings: FALSE
+#| tbl-cap: "Concordancia porcentual en la significancia de los efectos según \nréplicas y puntos centrales en el diseño experimental 2²"
+#| label: tbl-1
+## Datos unificados
+coef_tab <- c("A","B","A:B")
+comp_tab_22 <- data.frame(
+  Factores = coef_tab,
+  cr_5pc = comp1_22, Pot_cr_5pc = pot1_22, Err_cr_5pc = err1_22,
+  cr_0pc = comp2_22, Pot_cr_0pc = pot2_22, Err_cr_0pc = err2_22,
+  sr_5pc = comp3_22, Pot_sr_5pc = pot3_22, Err_sr_5pc = err3_22,
+  sr_2pc = comp4_22, Pot_sr_2pc = pot4_22, Err_sr_2pc = err4_22,
+  sr_0pc = comp6_22, Pot_sr_0pc = pot6_22, Err_sr_0pc = err6_22)
+
+## Definir encabezados
+encabezado <- data.frame(
+  col_keys = colnames(comp_tab_22),
+  Diseño = c("Factores",
+             rep("Con réplicas con 5 puntos centrales", 3),
+             rep("Con réplicas sin puntos centrales", 3),
+             rep("Sin réplicas con 5 puntos centrales", 3),
+             rep("Sin réplicas con 2 puntos centrales", 3),
+             rep("Sin réplicas sin puntos centrales (Lenth)", 3)),
+  Métrica = c("",
+              "Concordancia", "Potencia", "Error Tipo I",
+              "Concordancia", "Potencia", "Error Tipo I",
+              "Concordancia", "Potencia", "Error Tipo I",
+              "Concordancia", "Potencia", "Error Tipo I",
+              "Concordancia", "Potencia", "Error Tipo I"))
+
+## Construir flextable
+flextable(comp_tab_22) %>%
+  set_header_df(mapping = encabezado, key = "col_keys") %>%
+  theme_vanilla() %>%
+  flextable::align(align = "center", part = "all") %>%
+  autofit()
+```
+
+```{r}
+#| echo: FALSE
+#| warnings: FALSE
+#| label: fig-plot1
+
+comp_tab_22 <- data.frame(names_22, comp1_22, comp2_22, comp3_22, comp4_22, comp6_22)
+colnames(comp_tab_22) <- c("Factores",
+                        "con réplicas \ncon 5 puntos centrales",
+                        "con réplicas \nsin puntos centrales",
+                        "sin réplicas \ncon 5 puntos centrales",
+                        "sin réplicas \ncon 2 puntos centrales",
+                        "sin réplicas sin puntos centrales (Lenth)")
+
+# Reorganizar a formato largo
+comp_tab_22_long <- comp_tab_22 %>%
+  pivot_longer(
+    cols = -Factores,
+    names_to = "Diseño experimental",
+    values_to = "Concordancia (%)")
+
+# Gráfico con líneas verticales por coeficiente
+
+# Gráfico con líneas verticales por coeficiente
+ggplot(comp_tab_22_long, aes(x = Factores, 
+                          y = `Concordancia (%)`, 
+                          color = `Diseño experimental`)) +
+  geom_point(size = 3) +
+  geom_line(aes(group = Factores), color = "gray80") +
+  labs(
+    title = expression("Concordancia porcentual en la significancia de los efectos \nsegún réplicas y puntos centrales en el diseño experimental" ~ 2^2),
+    x = "Factor", y = "Concordancia (%)"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 12),
+    legend.spacing.y = unit(0.5, "cm"),
+    plot.margin = margin(t = 30, r = 10, b = 10, l = 10)  # más espacio arriba
+  ) +
+  guides(color = guide_legend(byrow = TRUE))
+```
+
+## Diseño factorial completo $2^3$
+
+```{r}
+#| echo: FALSE
+#| warnings: FALSE
+#| tbl-cap: "Concordancia porcentual en la significancia de los efectos según \nréplicas y puntos centrales en el diseño experimental 2³"
+#| label: tbl-2
+## Datos unificados
+coef_tab <- c("A","B","C","A:B","A:C","B:C","A:B:C")
+comp_tab_23 <- data.frame(
+  Factores = coef_tab,
+  cr_5pc = comp1_23, Pot_cr_5pc = pot1_23, Err_cr_5pc = err1_23,
+  cr_0pc = comp2_23, Pot_cr_0pc = pot2_23, Err_cr_0pc = err2_23,
+  sr_5pc = comp3_23, Pot_sr_5pc = pot3_23, Err_sr_5pc = err3_23,
+  sr_2pc = comp4_23, Pot_sr_2pc = pot4_23, Err_sr_2pc = err4_23,
+  sr_0pc = comp6_23, Pot_sr_0pc = pot6_23, Err_sr_0pc = err6_23)
+
+## Definir encabezados
+encabezado <- data.frame(
+  col_keys = colnames(comp_tab_23),
+  Diseño = c("Factores",
+             rep("Con réplicas con 5 puntos centrales", 3),
+             rep("Con réplicas sin puntos centrales", 3),
+             rep("Sin réplicas con 5 puntos centrales", 3),
+             rep("Sin réplicas con 2 puntos centrales", 3),
+             rep("Sin réplicas sin puntos centrales (Lenth)", 3)),
+  Métrica = c("",
+              "Concordancia", "Potencia", "Error Tipo I",
+              "Concordancia", "Potencia", "Error Tipo I",
+              "Concordancia", "Potencia", "Error Tipo I",
+              "Concordancia", "Potencia", "Error Tipo I",
+              "Concordancia", "Potencia", "Error Tipo I"))
+
+## Construir flextable
+flextable(comp_tab_23) %>%
+  set_header_df(mapping = encabezado, key = "col_keys") %>%
+  theme_vanilla() %>%
+  flextable::align(align = "center", part = "all") %>%
+  autofit()
+```
+
+```{r}
+#| echo: FALSE
+#| warnings: FALSE
+#| label: fig-plot2
+
+comp_tab_23 <- data.frame(names_23, comp1_23, comp2_23, comp3_23, comp4_23, comp6_23)
+colnames(comp_tab_23) <- c("Factores",
+                        "con réplicas \ncon 5 puntos centrales",
+                        "con réplicas \nsin puntos centrales",
+                        "sin réplicas \ncon 5 puntos centrales",
+                        "sin réplicas \ncon 2 puntos centrales",
+                        "sin réplicas sin puntos centrales (Lenth)")
+
+# Reorganizar a formato largo
+comp_tab_23_long <- comp_tab_23 %>%
+  pivot_longer(
+    cols = -Factores,
+    names_to = "Diseño experimental",
+    values_to = "Concordancia (%)")
+
+# Gráfico con líneas verticales por coeficiente
+
+# Gráfico con líneas verticales por coeficiente
+ggplot(comp_tab_23_long, aes(x = Factores, 
+                          y = `Concordancia (%)`, 
+                          color = `Diseño experimental`)) +
+  geom_point(size = 3) +
+  geom_line(aes(group = Factores), color = "gray80") +
+  labs(
+    title = expression("Concordancia porcentual en la significancia de los efectos \nsegún réplicas y puntos centrales en el diseño experimental" ~ 2^3),
+    x = "Factor", y = "Concordancia (%)"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 12),
+    legend.spacing.y = unit(0.5, "cm"),
+    plot.margin = margin(t = 30, r = 10, b = 10, l = 10)  # más espacio arriba
+  ) +
+  guides(color = guide_legend(byrow = TRUE))
+```
+
+## Diseño factorial completo $2^4$
+
+```{r}
+#| echo: FALSE
+#| warnings: FALSE
+#| tbl-cap: "Concordancia porcentual en la significancia de los efectos según \nréplicas y puntos centrales en el diseño experimental 2⁴"
+#| label: tbl-3
+## Datos unificados
+coef_tab <- c("A", "B", "C", "D",
+  "A:B", "A:C", "B:C", "A:D", "B:D", "C:D",
+  "A:B:C", "A:B:D", "A:C:D", "B:C:D",
+  "A:B:C:D")
+comp_tab_24 <- data.frame(
+  Factores = coef_tab,
+  cr_5pc = comp1_24, Pot_cr_5pc = pot1_24, Err_cr_5pc = err1_24,
+  cr_0pc = comp2_24, Pot_cr_0pc = pot2_24, Err_cr_0pc = err2_24,
+  sr_5pc = comp3_24, Pot_sr_5pc = pot3_24, Err_sr_5pc = err3_24,
+  sr_2pc = comp4_24, Pot_sr_2pc = pot4_24, Err_sr_2pc = err4_24,
+  sr_0pc = comp6_24, Pot_sr_0pc = pot6_24, Err_sr_0pc = err6_24)
+
+## Definir encabezados
+encabezado <- data.frame(
+  col_keys = colnames(comp_tab_24),
+  Diseño = c("Factores",
+             rep("Con réplicas con 5 puntos centrales", 3),
+             rep("Con réplicas sin puntos centrales", 3),
+             rep("Sin réplicas con 5 puntos centrales", 3),
+             rep("Sin réplicas con 2 puntos centrales", 3),
+             rep("Sin réplicas sin puntos centrales (Lenth)", 3)),
+  Métrica = c("",
+              "Concordancia", "Potencia", "Error Tipo I",
+              "Concordancia", "Potencia", "Error Tipo I",
+              "Concordancia", "Potencia", "Error Tipo I",
+              "Concordancia", "Potencia", "Error Tipo I",
+              "Concordancia", "Potencia", "Error Tipo I"))
+
+## Construir flextable
+flextable(comp_tab_24) %>%
+  set_header_df(mapping = encabezado, key = "col_keys") %>%
+  theme_vanilla() %>%
+  flextable::align(align = "center", part = "all") %>%
+  autofit()
+```
+
+```{r}
+#| echo: FALSE
+#| warnings: FALSE
+#| label: fig-plot3
+
+comp_tab_24 <- data.frame(names_24, comp1_24, comp2_24, comp3_24, comp4_24, comp6_24)
+colnames(comp_tab_24) <- c("Factores",
+                        "con réplicas \ncon 5 puntos centrales",
+                        "con réplicas \nsin puntos centrales",
+                        "sin réplicas \ncon 5 puntos centrales",
+                        "sin réplicas \ncon 2 puntos centrales",
+                        "sin réplicas sin puntos centrales (Lenth)")
+
+# Reorganizar a formato largo
+comp_tab_24_long <- comp_tab_24 %>%
+  pivot_longer(
+    cols = -Factores,
+    names_to = "Diseño experimental",
+    values_to = "Concordancia (%)")
+
+# Gráfico con líneas verticales por coeficiente
+
+# Gráfico con líneas verticales por coeficiente
+ggplot(comp_tab_24_long, aes(x = Factores, 
+                          y = `Concordancia (%)`, 
+                          color = `Diseño experimental`)) +
+  geom_point(size = 3) +
+  geom_line(aes(group = Factores), color = "gray80") +
+  labs(
+    title = expression("Concordancia porcentual en la significancia de los efectos \nsegún réplicas y puntos centrales en el diseño experimental" ~ 2^4),
+    x = "Factor", y = "Concordancia (%)"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 12),
+    legend.spacing.y = unit(0.5, "cm"),
+    plot.margin = margin(t = 30, r = 10, b = 10, l = 10),
+    axis.text.x = element_text(angle = 90, hjust = 1, , size = 8)
+  ) +
+  guides(color = guide_legend(byrow = TRUE))
+```
+
+## Diseño factorial completo $2^5$
+
+```{r}
+#| echo: FALSE
+#| warnings: FALSE
+#| tbl-cap: "Concordancia porcentual en la significancia de los efectos según \nréplicas y puntos centrales en el diseño experimental 2⁵"
+#| label: tbl-4
+
+## Datos unificados
+coef_tab <- c("A","B","C","D","E", 
+           "A:B","A:C","B:C","A:D","B:D","C:D","A:E","B:E","C:E","D:E",
+           "A:B:C","A:B:D","A:C:D","B:C:D","A:B:E","A:C:E","B:C:E","A:D:E","B:D:E","C:D:E",
+           "A:B:C:D","A:B:C:E","A:B:D:E","A:C:D:E","B:C:D:E",
+           "A:B:C:D:E")
+comp_tab_25 <- data.frame(
+  Factores = coef_tab,
+  cr_5pc = comp1_25, Pot_cr_5pc = pot1_25, Err_cr_5pc = err1_25,
+  cr_0pc = comp2_25, Pot_cr_0pc = pot2_25, Err_cr_0pc = err2_25,
+  sr_5pc = comp3_25, Pot_sr_5pc = pot3_25, Err_sr_5pc = err3_25,
+  sr_2pc = comp4_25, Pot_sr_2pc = pot4_25, Err_sr_2pc = err4_25,
+  sr_0pc = comp6_25, Pot_sr_0pc = pot6_25, Err_sr_0pc = err6_25)
+
+## Definir encabezados
+encabezado <- data.frame(
+  col_keys = colnames(comp_tab_25),
+  Diseño = c("Factores",
+             rep("Con réplicas con 5 puntos centrales", 3),
+             rep("Con réplicas sin puntos centrales", 3),
+             rep("Sin réplicas con 5 puntos centrales", 3),
+             rep("Sin réplicas con 2 puntos centrales", 3),
+             rep("Sin réplicas sin puntos centrales (Lenth)", 3)),
+  Métrica = c("",
+              "Concordancia", "Potencia", "Error Tipo I",
+              "Concordancia", "Potencia", "Error Tipo I",
+              "Concordancia", "Potencia", "Error Tipo I",
+              "Concordancia", "Potencia", "Error Tipo I",
+              "Concordancia", "Potencia", "Error Tipo I"))
+
+## Construir flextable
+flextable(comp_tab_25) %>%
+  set_header_df(mapping = encabezado, key = "col_keys") %>%
+  theme_vanilla() %>%
+  flextable::align(align = "center", part = "all") %>%
+  autofit()
+```
+
+```{r}
+#| echo: FALSE
+#| warnings: FALSE
+#| label: fig-plot4
+
+comp_tab_25 <- data.frame(names_25, comp1_25, comp2_25, comp3_25, comp4_25, comp6_25)
+colnames(comp_tab_25) <- c("Factores",
+                        "con réplicas \ncon 5 puntos centrales",
+                        "con réplicas \nsin puntos centrales",
+                        "sin réplicas \ncon 5 puntos centrales",
+                        "sin réplicas \ncon 2 puntos centrales",
+                        "sin réplicas sin puntos centrales (Lenth)")
+
+# Reorganizar a formato largo
+comp_tab_25_long <- comp_tab_25 %>%
+  pivot_longer(
+    cols = -Factores,
+    names_to = "Diseño experimental",
+    values_to = "Concordancia (%)")
+
+# Gráfico con líneas verticales por coeficiente
+
+# Gráfico con líneas verticales por coeficiente
+ggplot(comp_tab_25_long, aes(x = Factores, 
+                          y = `Concordancia (%)`, 
+                          color = `Diseño experimental`)) +
+  geom_point(size = 3) +
+  geom_line(aes(group = Factores), color = "gray80") +
+  labs(
+    title = expression("Concordancia porcentual en la significancia de los efectos \nsegún réplicas y puntos centrales en el diseño experimental" ~ 2^5),
+    x = "Factor", y = "Concordancia (%)"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 12),
+    legend.spacing.y = unit(0.5, "cm"),
+    plot.margin = margin(t = 30, r = 10, b = 10, l = 10),
+    axis.text.x = element_text(angle = 90, hjust = 1, , size = 8)
+  ) +
+  guides(color = guide_legend(byrow = TRUE))
+```
+
+## Evaluación del ECM por medidas repetidas para todos los tratamientos
+
+### Análisis descriptivo de los ECM por diseño
+
+```{r}
+#| echo: FALSE
+#| warnings: FALSE
+#| fig-cap: "Análisis descriptivo de los ECM por diseño factorial"
+#| label: fig-plot5
+#| fig-width: 15
+#| fig-height: 8
+
+# Tabla compilada
+ECM_all <- as.data.frame(cbind(ECM_tab_22, ECM_tab_23, ECM_tab_24, ECM_tab_25))
+
+# Definir colores
+colores <- c("#08519C", "#4292C6", "#9ECAE1", "#DEEBF7")
+colores_rep <- rep(colores, 4)
+
+# Posiciones de los boxplots (con espacios entre grupos)
+posiciones <- c(1:4, 6:9, 11:14, 16:19)
+
+# Boxplot sin ejes X (xaxt = "n")
+boxplot(ECM_all,
+        col = colores_rep,
+        las = 2,
+        ylab = "ECM",
+        at = posiciones,
+        xaxt = "n"  # desactivar etiquetas por defecto en X
+)
+
+abline(v = c(5, 10, 15), lty = 2, col = "gray60")
+
+axis(1,
+     at = c(mean(1:4), mean(6:9), mean(11:14), mean(16:19)),
+     labels = c(
+       expression("Diseño factorial " * 2^2),
+       expression("Diseño factorial " * 2^3),
+       expression("Diseño factorial " * 2^4),
+       expression("Diseño factorial " * 2^5)),
+     tick = FALSE,
+     cex.axis = 0.9,
+     line = 1
+)
+
+# Leyenda
+legend("topright",
+       legend = c("cr_5pc", "cr_0pc", "sr_5pc", "sr_2pc"),
+       fill = colores,
+       border = "black",
+       bty = "n")
+
+```
+
+### Matriz de contrastes generales $C_1$
+
+```{r}
+#| echo: FALSE
+#| warnings: FALSE
+#| tab-cap: "Evaluación del contraste simultaneo de todas las medias de los tratamientos"
+#| label: tbl-5
+
+X22=as.matrix(ECM_tab_22)
+X23=as.matrix(ECM_tab_23)
+X24=as.matrix(ECM_tab_24)
+X25=as.matrix(ECM_tab_25)
+
+res_hotelling22 <- Hotelling(X22, C1, 0.05)
+res_hotelling23 <- Hotelling(X23, C1, 0.05)
+res_hotelling24 <- Hotelling(X24, C1, 0.05)
+res_hotelling25 <- Hotelling(X25, C1, 0.05)
+
+# Construcción de la tabla 
+TAB7 <- data.frame(
+  Dis = c("Diseño factorial 2²",
+           "Diseño factorial 2³",
+           "Diseño factorial 2⁴",
+           "Diseño factorial 2⁵"),
+  
+  T2 = c(round(res_hotelling22$T2, 2),
+         round(res_hotelling23$T2, 2),
+         round(res_hotelling24$T2, 2),
+         round(res_hotelling25$T2, 2)),
+  
+  F_calculado = c(round(res_hotelling22$Fcal, 2),
+                  round(res_hotelling23$Fcal, 2),
+                  round(res_hotelling24$Fcal, 2),
+                  round(res_hotelling25$Fcal, 2)),
+  
+  F_critico = c(round(res_hotelling22$F_critico, 2),
+                round(res_hotelling23$F_critico, 2),
+                round(res_hotelling24$F_critico, 2),
+                round(res_hotelling25$F_critico, 2)),
+  
+  Dec = c(ifelse(res_hotelling22$Fcal > res_hotelling22$F_critico, "Se rechaza H₀", "No se rechaza H₀"),
+               ifelse(res_hotelling23$Fcal > res_hotelling23$F_critico, "Se rechaza H₀", "No se rechaza H₀"),
+               ifelse(res_hotelling24$Fcal > res_hotelling24$F_critico, "Se rechaza H₀", "No se rechaza H₀"),
+               ifelse(res_hotelling25$Fcal > res_hotelling25$F_critico, "Se rechaza H₀", "No se rechaza H₀"))
+)
+
+colnames(TAB7) <- c("Diseño", "T²", "F_calculado", "F_crítico", "Decisión")
+
+TAB7 %>%
+  flextable() %>%
+  theme_vanilla() %>%
+  align(align = "center", part = "all") %>%
+  autofit() %>%
+  width(j = 1:ncol(TAB7), width = 1.5)
+```
+
+### Matriz de contrastes generales de interés $C_2$
+
+```{r}
+#| echo: FALSE
+#| warnings: FALSE
+#| tab-cap: "Evaluación de contrastes generales de interés"
+#| label: tbl-6
+
+X22=as.matrix(ECM_tab_22)
+X23=as.matrix(ECM_tab_23)
+X24=as.matrix(ECM_tab_24)
+X25=as.matrix(ECM_tab_25)
+
+res_hotelling22 <- Hotelling(X22, C2, 0.05)
+res_hotelling23 <- Hotelling(X23, C2, 0.05)
+res_hotelling24 <- Hotelling(X24, C2, 0.05)
+res_hotelling25 <- Hotelling(X25, C2, 0.05)
+
+# Construcción de la tabla
+TAB8 <- data.frame(
+  Dis = c("Diseño factorial 2²",
+           "Diseño factorial 2³",
+           "Diseño factorial 2⁴",
+           "Diseño factorial 2⁵"),
+  
+  T2 = c(round(res_hotelling22$T2, 2),
+         round(res_hotelling23$T2, 2),
+         round(res_hotelling24$T2, 2),
+         round(res_hotelling25$T2, 2)),
+  
+  F_calculado = c(round(res_hotelling22$Fcal, 2),
+                  round(res_hotelling23$Fcal, 2),
+                  round(res_hotelling24$Fcal, 2),
+                  round(res_hotelling25$Fcal, 2)),
+  
+  F_critico = c(round(res_hotelling22$F_critico, 2),
+                round(res_hotelling23$F_critico, 2),
+                round(res_hotelling24$F_critico, 2),
+                round(res_hotelling25$F_critico, 2)),
+  
+  Dec = c(ifelse(res_hotelling22$Fcal > res_hotelling22$F_critico, "Se rechaza H₀", "No se rechaza H₀"),
+               ifelse(res_hotelling23$Fcal > res_hotelling23$F_critico, "Se rechaza H₀", "No se rechaza H₀"),
+               ifelse(res_hotelling24$Fcal > res_hotelling24$F_critico, "Se rechaza H₀", "No se rechaza H₀"),
+               ifelse(res_hotelling25$Fcal > res_hotelling25$F_critico, "Se rechaza H₀", "No se rechaza H₀"))
+)
+
+colnames(TAB8) <- c("Diseño", "T²", "F_calculado", "F_crítico", "Decisión")
+
+TAB8 %>%
+  flextable() %>%
+  theme_vanilla() %>%
+  align(align = "center", part = "all") %>%
+  autofit() %>%
+  width(j = 1:ncol(TAB8), width = 1.5)
+
+```
+
+Dado que, al evaluar la matriz de contrastes, se rechazó la hipótesis nula, es decir, al menos hay uno de los contrastes que es diferente de 0, resulta necesario analizar cada contraste de manera individual, obteniéndose los siguientes resultados:
+
+#### Contraste $C_{21} =$ (`r c1`)
+
+```{r}
+#| echo: FALSE
+#| warnings: FALSE
+#| tab-cap: "Evaluación del contraste que relaciona los diseños con réplica con respecto a los diseños sin réplica"
+#| label: tbl-7
+
+## Con réplica vs. sin réplica
+c1 <- c(-1, -1,  1,  1)  
+C <- matrix(c1, nrow = 1)
+
+X22=as.matrix(ECM_tab_22)
+X23=as.matrix(ECM_tab_23)
+X24=as.matrix(ECM_tab_24)
+X25=as.matrix(ECM_tab_25)
+
+res_hotelling22 <- Hotelling(X22, C, 0.05)
+res_hotelling23 <- Hotelling(X23, C, 0.05)
+res_hotelling24 <- Hotelling(X24, C, 0.05)
+res_hotelling25 <- Hotelling(X25, C, 0.05)
+
+# Construcción de la tabla 
+TAB9 <- data.frame(
+  Dis = c("Diseño factorial 2²",
+           "Diseño factorial 2³",
+           "Diseño factorial 2⁴",
+           "Diseño factorial 2⁵"),
+  
+  T2 = c(round(res_hotelling22$T2, 2),
+         round(res_hotelling23$T2, 2),
+         round(res_hotelling24$T2, 2),
+         round(res_hotelling25$T2, 2)),
+  
+  F_calculado = c(round(res_hotelling22$Fcal, 2),
+                  round(res_hotelling23$Fcal, 2),
+                  round(res_hotelling24$Fcal, 2),
+                  round(res_hotelling25$Fcal, 2)),
+  
+  F_critico = c(round(res_hotelling22$F_critico, 2),
+                round(res_hotelling23$F_critico, 2),
+                round(res_hotelling24$F_critico, 2),
+                round(res_hotelling25$F_critico, 2)),
+  
+  Dec = c(ifelse(res_hotelling22$Fcal > res_hotelling22$F_critico, "Se rechaza H₀", "No se rechaza H₀"),
+               ifelse(res_hotelling23$Fcal > res_hotelling23$F_critico, "Se rechaza H₀", "No se rechaza H₀"),
+               ifelse(res_hotelling24$Fcal > res_hotelling24$F_critico, "Se rechaza H₀", "No se rechaza H₀"),
+               ifelse(res_hotelling25$Fcal > res_hotelling25$F_critico, "Se rechaza H₀", "No se rechaza H₀"))
+)
+
+colnames(TAB9) <- c("Diseño", "T²", "F_calculado", "F_crítico", "Decisión")
+
+TAB9 %>%
+  flextable() %>%
+  theme_vanilla() %>%
+  align(align = "center", part = "all") %>%
+  autofit() %>%
+  width(j = 1:ncol(TAB9), width = 1.5)
+```
+
+#### Contraste $C_{22} =$ (`r c2`)
+
+```{r}
+#| echo: FALSE
+#| warnings: FALSE
+#| tab-cap: "Evaluación del contraste que relaciona el diseño con réplica y 5 puntos centrales frente al conjunto de variantes derivadas del mismo"
+#| label: tbl-8
+
+## Evaluación de todo vs. el primero
+c2 <- c(-1,  1,  1,  1) 
+C <- matrix(c2, nrow = 1)
+
+X22=as.matrix(ECM_tab_22)
+X23=as.matrix(ECM_tab_23)
+X24=as.matrix(ECM_tab_24)
+X25=as.matrix(ECM_tab_25)
+
+res_hotelling22 <- Hotelling(X22, C, 0.05)
+res_hotelling23 <- Hotelling(X23, C, 0.05)
+res_hotelling24 <- Hotelling(X24, C, 0.05)
+res_hotelling25 <- Hotelling(X25, C, 0.05)
+
+# Construcción de la tabla 
+TAB10 <- data.frame(
+  Dis = c("Diseño factorial 2²",
+           "Diseño factorial 2³",
+           "Diseño factorial 2⁴",
+           "Diseño factorial 2⁵"),
+  
+  T2 = c(round(res_hotelling22$T2, 2),
+         round(res_hotelling23$T2, 2),
+         round(res_hotelling24$T2, 2),
+         round(res_hotelling25$T2, 2)),
+  
+  F_calculado = c(round(res_hotelling22$Fcal, 2),
+                  round(res_hotelling23$Fcal, 2),
+                  round(res_hotelling24$Fcal, 2),
+                  round(res_hotelling25$Fcal, 2)),
+  
+  F_critico = c(round(res_hotelling22$F_critico, 2),
+                round(res_hotelling23$F_critico, 2),
+                round(res_hotelling24$F_critico, 2),
+                round(res_hotelling25$F_critico, 2)),
+  
+  Dec = c(ifelse(res_hotelling22$Fcal > res_hotelling22$F_critico, "Se rechaza H₀", "No se rechaza H₀"),
+               ifelse(res_hotelling23$Fcal > res_hotelling23$F_critico, "Se rechaza H₀", "No se rechaza H₀"),
+               ifelse(res_hotelling24$Fcal > res_hotelling24$F_critico, "Se rechaza H₀", "No se rechaza H₀"),
+               ifelse(res_hotelling25$Fcal > res_hotelling25$F_critico, "Se rechaza H₀", "No se rechaza H₀"))
+)
+
+colnames(TAB10) <- c("Diseño", "T²", "F_calculado", "F_crítico", "Decisión")
+
+TAB10 %>%
+  flextable() %>%
+  theme_vanilla() %>%
+  align(align = "center", part = "all") %>%
+  autofit() %>%
+  width(j = 1:ncol(TAB10), width = 1.5)
+
+```
+
+#### Contraste $C_{23} =$ (`r c3`)
+
+```{r}
+#| echo: FALSE
+#| warnings: FALSE
+#| tab-cap: "Evaluación del contraste que relaciona el impacto de la réplica en diseños con la misma cantidad de puntos centrales"
+#| label: tbl-9
+
+## Evaluación de la réplica con la misma cantidad de los puntos centrales
+c3 <- c( 1, -1,  0,  0)    
+C <- matrix(c3, nrow = 1)
+
+X22=as.matrix(ECM_tab_22)
+X23=as.matrix(ECM_tab_23)
+X24=as.matrix(ECM_tab_24)
+X25=as.matrix(ECM_tab_25)
+
+res_hotelling22 <- Hotelling(X22, C, 0.05)
+res_hotelling23 <- Hotelling(X23, C, 0.05)
+res_hotelling24 <- Hotelling(X24, C, 0.05)
+res_hotelling25 <- Hotelling(X25, C, 0.05)
+
+# Construcción de la tabla 
+TAB11 <- data.frame(
+  Dis = c("Diseño factorial 2²",
+           "Diseño factorial 2³",
+           "Diseño factorial 2⁴",
+           "Diseño factorial 2⁵"),
+  
+  T2 = c(round(res_hotelling22$T2, 2),
+         round(res_hotelling23$T2, 2),
+         round(res_hotelling24$T2, 2),
+         round(res_hotelling25$T2, 2)),
+  
+  F_calculado = c(round(res_hotelling22$Fcal, 2),
+                  round(res_hotelling23$Fcal, 2),
+                  round(res_hotelling24$Fcal, 2),
+                  round(res_hotelling25$Fcal, 2)),
+  
+  F_critico = c(round(res_hotelling22$F_critico, 2),
+                round(res_hotelling23$F_critico, 2),
+                round(res_hotelling24$F_critico, 2),
+                round(res_hotelling25$F_critico, 2)),
+  
+  Dec = c(ifelse(res_hotelling22$Fcal > res_hotelling22$F_critico, "Se rechaza H₀", "No se rechaza H₀"),
+               ifelse(res_hotelling23$Fcal > res_hotelling23$F_critico, "Se rechaza H₀", "No se rechaza H₀"),
+               ifelse(res_hotelling24$Fcal > res_hotelling24$F_critico, "Se rechaza H₀", "No se rechaza H₀"),
+               ifelse(res_hotelling25$Fcal > res_hotelling25$F_critico, "Se rechaza H₀", "No se rechaza H₀"))
+)
+
+colnames(TAB11) <- c("Diseño", "T²", "F_calculado", "F_crítico", "Decisión")
+
+TAB11 %>%
+  flextable() %>%
+  theme_vanilla() %>%
+  align(align = "center", part = "all") %>%
+  autofit() %>%
+  width(j = 1:ncol(TAB11), width = 1.5)
+```
+

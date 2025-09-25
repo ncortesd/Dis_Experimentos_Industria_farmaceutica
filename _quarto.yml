@@ -1,0 +1,148 @@
+project:
+  type: book
+  output-dir: docs
+
+book:
+  title: "Guía para la implementación de diseños experimentales en la industria farmacéutica"
+  author: "Nathalia Cortés Duque"
+  # sharing: [twitter, facebook, linkedin]
+  search: 
+   location: navbar
+   type: textbox
+   limit: 10
+   collapse-after: 2
+   copy-button: true
+  # navbar: 
+  #   background: white
+  #   foreground: "#1E88E5"
+  #   #logo: images/logo2.png
+  #   left:
+  #     - text: UNAL
+  #       icon: bank2
+  #       href: https://unal.edu.co
+  #       target: _blank
+  #     - text: GitHub
+  #       icon: github
+  #       href: https://github.com/estadisticaun/Memoria
+  #       target: _blank
+  #     - text: Compartir
+  #       icon: share
+  #       menu: 
+  #         - icon: twitter
+  #           text: Twitter
+  #           href: https://twitter.com/share?url=<estadisticaun.github.io/Memoria>
+  #           target: _blank
+  #         - icon: facebook
+  #           text: facebook
+  #           href: https://www.facebook.com/share.php?u=estadisticaun.github.io/Memoria
+  #           target: _blank
+  #         - icon: linkedin
+  #           text: Linkedln
+  #           href: https://www.linkedin.com/sharing/share-offsite/?url=estadisticaun.github.io/Memoria
+  #           target: _blank
+  reader-mode: true
+  page-footer:
+    left: |
+      Universidad Nacional de Colombia. 
+    right: |
+      Universidad Nacional de Colombia. 
+    center: |
+      DOE
+    background: "#ECEFF1"
+    foreground: "#37474F"
+    border: true
+  # cover-image: images/PortadaFinal.jpg
+  # favicon: images/PortadaFinal.jpg
+  # cover-image-alt: |
+  #   hOLAAAA 
+  # site-url: https://estadisticaun.github.io/Memoria
+  repo-branch: main
+  repo-actions: [edit, issue]
+  date: today
+  date-format: long
+  page-navigation: true
+  chapters:
+    - index.qmd
+    - 01_dis_factoriales/compilado_factoriales_completos_vfinal.qmd
+    #- compilado_factoriales_fraccionales_vfinal.qmd
+    #- compilado_imputacion_mezclas_vfinal.qmd
+  sidebar:
+    style: docked
+    background: none
+    foreground: "#2196F3"
+    border: true
+    alignment: "left"
+    # logo: images/logo.svg
+    
+
+      
+website:
+  back-to-top-navigation: true
+
+
+format:
+  html:
+    lang: es
+    theme: 
+      light: claro.scss
+      dark: oscuro.scss
+    include-in-header:
+      - file: style.html
+    include-after-body:
+      - file: scripts.html
+    # grid:
+    #   sidebar-width: 300px
+    #   body-width: 1100px
+    #   margin-width: 250px
+    #   gutter-width: 1.5rem
+    #   content-mode: full
+    toc-location: right
+    number-sections: true
+    number-depth: 10
+    toc-depth: 5
+    # fontsize: 20px
+    # linestretch: 0.9
+    # fontcolor: "#424242"
+    # monobackgroundcolor: "yellow"
+    # backgroundcolor: "#FAFAFA"
+    linkcolor: "#0c5feb"
+    # page-layout: article
+    title-block-style: none
+    # title-block-banner: true
+    # title-block-banner-color: red
+    # title-block-categories: enables
+    margin-left: 0px
+    margin-right: 0px
+    margin-top: 0px
+    margin-bottom: 0px
+    #Code
+    code-fold: show
+    code-summary: "Código"	
+    code-overflow: scroll
+    code-line-numbers: 3,4,5
+    code-copy: hover
+    code-link: false
+    code-annotations: true
+    # code-tools:
+    code-block-border-left: "#EC407A"
+    #code-block-bg: "#CFD8DC"
+    # highlight-style:
+    #Figures
+    # fig-align: left
+    fig-cap-location: bottom
+    #Tables
+    tbl-cap-location: bottom
+    #Links
+    link-external-icon: true
+    link-external-newwindow: true
+    #Footnotes
+    footnotes-hover: true
+    reference-location: section
+  pdf:
+    documentclass: book
+  
+
+# bibliography: 
+
+editor: visual
+
