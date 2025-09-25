@@ -27,7 +27,7 @@ El presente documento corresponde a un apartado del trabajo titulado *“Guía p
 #| echo: FALSE
 #| warnings: FALSE
 # Número de iteraciones - significancia de efectos
-n <- 10
+n <- 1000
 ```
 
 El presente estudio tiene como propósito analizar el impacto de eliminar réplicas o los puntos centrales en un diseño factorial fraccional $2^{k-p}$ sobre la significancia estadística de los efectos principales e interacciones, así como sobre el error cuadrático medio (ECM). Para este fin se realizaron `r n` simulaciones independientes, y en cada simulación se generó un caso particular de efectos activos y su correspondiente respuesta (Ver *Metodología* [aquí](https://ncortesd.github.io/Dis_Experimentos_Industria_farmaceutica/01_dis_factoriales/compilado_factoriales_completos_vfinal.html)).
