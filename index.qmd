@@ -1,3 +1,5 @@
 # Portada {.unnumbered}
 
-Prueba
+::: callout-note
+El presente documento corresponde a un apartado del trabajo titulado *“Guía para la implementación de diseños experimentales en la industria farmacéutica”*, presentado por Nathalia Cortés Duque como requisito para optar al título de *Magíster en Ciencias - Estadística* de la Universidad Nacional de Colombia.
+::

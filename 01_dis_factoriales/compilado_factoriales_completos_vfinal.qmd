@@ -16,7 +16,7 @@ format:
 ---
 
 ::: callout-note
-El presente documento corresponde a un apartado del trabajo titulado *“Guía para la implementación de diseños experimentales en la industria farmacéutica”*, presentado por Nathalia Cortés Duque como requisito para optar al título de _Magíster en Ciencias - Estadística_ de la Universidad Nacional de Colombia.
+El presente documento corresponde a un apartado del trabajo titulado *“Guía para la implementación de diseños experimentales en la industria farmacéutica”*, presentado por Nathalia Cortés Duque como requisito para optar al título de *Magíster en Ciencias - Estadística* de la Universidad Nacional de Colombia.
 :::
 
 # *Metodología*
@@ -27,7 +27,7 @@ El presente documento corresponde a un apartado del trabajo titulado *“Guía p
 #| echo: FALSE
 #| warnings: FALSE
 # Número de iteraciones - significancia de efectos
-n <- 1000
+n <- 10
 ```
 
 El presente estudio tiene como propósito analizar el impacto de eliminar réplicas o los puntos centrales en un diseño factorial completo $2^k$ sobre la significancia estadística de los efectos principales e interacciones, así como sobre el error cuadrático medio (ECM). Para este fin se realizaron `r n` simulaciones independientes, y en cada simulación se generó un caso particular de efectos activos y su correspondiente respuesta.

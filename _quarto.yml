@@ -87,10 +87,10 @@ format:
     theme: 
       light: claro.scss
       dark: oscuro.scss
-    include-in-header:
-      - file: style.html
-    include-after-body:
-      - file: scripts.html
+    # include-in-header:
+    #   - file: style.html
+    # include-after-body:
+    #   - file: scripts.html
     # grid:
     #   sidebar-width: 300px
     #   body-width: 1100px
