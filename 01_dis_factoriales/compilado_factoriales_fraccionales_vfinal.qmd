@@ -821,7 +821,7 @@ Hotelling <- function(X, C, alpha) {
 ```{r}
 #| echo: FALSE
 #| warnings: FALSE
-#| tbl-cap: "Concordancia porcentual en la significancia de los efectos según \nréplicas y puntos centrales en el diseño experimental 2³"
+#| tbl-cap: "Concordancia porcentual en la significancia de los efectos según \nréplicas y puntos centrales en el diseño factorial 2³⁻¹"
 #| label: tbl-2
 ## Datos unificados
 coef_tab_23 <- c("Ap","Bp","Cp")
@@ -882,7 +882,7 @@ ggplot(comp_tab_23_long, aes(x = Factores,
   geom_point(size = 3) +
   geom_line(aes(group = Factores), color = "gray80") +
   labs(
-    title = expression("Concordancia porcentual en la significancia de los efectos \nsegún réplicas y puntos centrales en el diseño experimental" ~ 2^3),
+    title = expression("Concordancia porcentual en la significancia de los efectos \nsegún réplicas y puntos centrales en el diseño experimental" ~ 2^{3-1}),
     x = "Factor", y = "Concordancia (%)"
   ) +
   theme_minimal() +
@@ -899,7 +899,7 @@ ggplot(comp_tab_23_long, aes(x = Factores,
 ```{r}
 #| echo: FALSE
 #| warnings: FALSE
-#| tbl-cap: "Concordancia porcentual en la significancia de los efectos según \nréplicas y puntos centrales en el diseño experimental 2⁴"
+#| tbl-cap: "Concordancia porcentual en la significancia de los efectos según \nréplicas y puntos centrales en el diseño factorial 2⁴⁻¹"
 #| label: tbl-3
 ## Datos unificados
 coef_tab_24<- c("Ap", "Bp", "Cp", "Dp")
@@ -960,7 +960,7 @@ ggplot(comp_tab_24_long, aes(x = Factores,
   geom_point(size = 3) +
   geom_line(aes(group = Factores), color = "gray80") +
   labs(
-    title = expression("Concordancia porcentual en la significancia de los efectos \nsegún réplicas y puntos centrales en el diseño experimental" ~ 2^4),
+    title = expression("Concordancia porcentual en la significancia de los efectos \nsegún réplicas y puntos centrales en el diseño experimental" ~ 2^{4-1}),
     x = "Factor", y = "Concordancia (%)"
   ) +
   theme_minimal() +
@@ -978,7 +978,7 @@ ggplot(comp_tab_24_long, aes(x = Factores,
 ```{r}
 #| echo: FALSE
 #| warnings: FALSE
-#| tbl-cap: "Concordancia porcentual en la significancia de los efectos según \nréplicas y puntos centrales en el diseño experimental 2⁵"
+#| tbl-cap: "Concordancia porcentual en la significancia de los efectos según \nréplicas y puntos centrales en el diseño factorial 2⁵⁻²"
 #| label: tbl-4
 
 ## Datos unificados
@@ -1040,7 +1040,7 @@ ggplot(comp_tab_25_long, aes(x = Factores,
   geom_point(size = 3) +
   geom_line(aes(group = Factores), color = "gray80") +
   labs(
-    title = expression("Concordancia porcentual en la significancia de los efectos \nsegún réplicas y puntos centrales en el diseño experimental" ~ 2^5),
+    title = expression("Concordancia porcentual en la significancia de los efectos \nsegún réplicas y puntos centrales en el diseño experimental" ~ 2^{5-1}),
     x = "Factor", y = "Concordancia (%)"
   ) +
   theme_minimal() +
@@ -1060,7 +1060,7 @@ ggplot(comp_tab_25_long, aes(x = Factores,
 ```{r}
 #| echo: FALSE
 #| warnings: FALSE
-#| fig-cap: "Análisis descriptivo de los ECM por diseño factorial"
+#| fig-cap: "Análisis descriptivo de los ECM por diseño factorial fraccional"
 #| label: fig-plot5
 #| fig-width: 15
 #| fig-height: 8
@@ -1110,7 +1110,7 @@ legend("topright",
 ```{r}
 #| echo: FALSE
 #| warnings: FALSE
-#| tab-cap: "Evaluación del contraste simultaneo de todas las medias de los tratamientos"
+#| tab-cap: "Evaluación del contraste simultaneo de todas las medias de los diseño factoriales fraccionales"
 #| label: tbl-5
 
 X23=as.matrix(ECM_tab_23)
