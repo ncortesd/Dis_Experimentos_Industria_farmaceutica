@@ -10,10 +10,14 @@ format:
   html:
     toc: true
     toc-title: "Índice"
-    toc-location: body
-    toc-depth: 3
+    toc-location: right
+    toc-depth: 2
     toc-expand: true
 ---
+
+::: callout-note
+El presente documento corresponde a un apartado del trabajo titulado *“Guía para la implementación de diseños experimentales en la industria farmacéutica”*, presentado por Nathalia Cortés Duque como requisito para optar al título de _Magíster en Ciencias - Estadística_ de la Universidad Nacional de Colombia.
+:::
 
 # *Metodología*
 
@@ -23,7 +27,7 @@ format:
 #| echo: FALSE
 #| warnings: FALSE
 # Número de iteraciones - significancia de efectos
-n <- 10
+n <- 1000
 ```
 
 El presente estudio tiene como propósito analizar el impacto de eliminar réplicas o los puntos centrales en un diseño factorial completo $2^k$ sobre la significancia estadística de los efectos principales e interacciones, así como sobre el error cuadrático medio (ECM). Para este fin se realizaron `r n` simulaciones independientes, y en cada simulación se generó un caso particular de efectos activos y su correspondiente respuesta.
@@ -31,7 +35,7 @@ El presente estudio tiene como propósito analizar el impacto de eliminar répli
 En cada simulación se genera un vector con todos los factores y sus interacciones del respectivo diseño factorial completo $2^k$ los cuales se agrupan en el vector `todos_efectos`, así:
 
 | Diseño factorial | Número de efectos | Efectos |
-|-----------------------|-------------------------------|------------------|
+|------------------------|------------------------|------------------------|
 | $2^2$ | 3 | A, B, AB |
 | $2^3$ | 7 | A, B, C, AB, AC, BC, ABC |
 | $2^4$ | 15 | A, B, C, D, AB, AC, AD, BC, BD, CD, ABC, ABD, ACD, BCD, ABCD |
@@ -101,7 +105,7 @@ $$
 
 Con los resultados de significancia de los efectos se almacenan en las tablas `TAB1_22`, `TAB2_22`y `TAB3_22`, donde el valor 1 indica significancia estadística ($p < 0.05$) y 0 indica no significancia. Este procedimiento se implementa evaluando, en cada fila del ANOVA, si el valor $p$ es menor o igual a 0.05, transformando el resultado lógico en un valor entero.
 
-A partir de estas tablas se calcula el *porcentaje de concordancia* entre los efectos reales y los detectados por cada modelo, la *potencia* (proporción de efectos verdaderamente significativos correctamente identificados) y el *error tipo I* (proporción de efectos nulos detectados como significativos). Los resultados se resumen en la @tbl-1, mientras que la concordancia por factor se presenta en la @fig-plot1.
+A partir de estas tablas se calcula el *porcentaje de concordancia* entre los efectos reales y los detectados por cada modelo, la *potencia* (proporción de efectos verdaderamente significativos correctamente identificados) y el *error tipo I* (proporción de efectos nulos detectados como significativos).
 
 ## Evaluación del ECM con medidas repetidas
 
@@ -209,7 +213,7 @@ cat("Librerías requeridas:", paste(paquetes, collapse = ", "))
 
 ```
 
-## Diseño factorial completo $2^2$
+## Diseño $2^2$
 
 ### Significancia de los efectos
 
@@ -392,7 +396,7 @@ err6_22 <- round(colSums((efectos_reales_22 == 0) & (TAB6_22 == 1)) /
                 colSums(efectos_reales_22 == 0) * 100, 2)
 ```
 
-## Diseño factorial completo $2^3$
+## Diseño $2^3$
 
 ### Significancia de los efectos
 
@@ -584,7 +588,7 @@ err6_23 <- round(colSums((efectos_reales_23 == 0) & (TAB6_23 == 1)) /
                 colSums(efectos_reales_23 == 0) * 100, 2)
 ```
 
-## Diseño factorial completo $2^4$
+## Diseño $2^4$
 
 ### Significancia de los efectos
 
@@ -805,7 +809,7 @@ err6_24 <- round(colSums((efectos_reales_24 == 0) & (TAB6_24 == 1)) /
                 colSums(efectos_reales_24 == 0) * 100, 2)
 ```
 
-## Diseño factorial completo $2^5$
+## Diseño $2^5$
 
 ### Significancia de los efectos
 
@@ -1110,7 +1114,7 @@ Hotelling <- function(X, C, alpha) {
 
 # *Resultados*
 
-## Diseño factorial completo $2^2$
+## Diseño $2^2$
 
 ```{r}
 #| echo: FALSE
@@ -1192,7 +1196,7 @@ ggplot(comp_tab_22_long, aes(x = Factores,
   guides(color = guide_legend(byrow = TRUE))
 ```
 
-## Diseño factorial completo $2^3$
+## Diseño $2^3$
 
 ```{r}
 #| echo: FALSE
@@ -1274,7 +1278,7 @@ ggplot(comp_tab_23_long, aes(x = Factores,
   guides(color = guide_legend(byrow = TRUE))
 ```
 
-## Diseño factorial completo $2^4$
+## Diseño $2^4$
 
 ```{r}
 #| echo: FALSE
@@ -1360,7 +1364,7 @@ ggplot(comp_tab_24_long, aes(x = Factores,
   guides(color = guide_legend(byrow = TRUE))
 ```
 
-## Diseño factorial completo $2^5$
+## Diseño $2^5$
 
 ```{r}
 #| echo: FALSE
