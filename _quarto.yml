@@ -63,8 +63,8 @@ book:
   page-navigation: true
   chapters:
     - index.qmd
-    - 01_dis_factoriales/compilado_factoriales_completos_vfinal.qmd
-    - 01_dis_factoriales/compilado_factoriales_fraccionales_vfinal.qmd
+    #- 01_dis_factoriales/compilado_factoriales_completos_vfinal.qmd
+    #- 01_dis_factoriales/compilado_factoriales_fraccionales_vfinal.qmd
     #- compilado_factoriales_fraccionales_vfinal.qmd
     #- compilado_imputacion_mezclas_vfinal.qmd
   sidebar:
